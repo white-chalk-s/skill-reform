@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务方法沉淀平台 - 首页原型</title>
+  <style>
+    :root{
+      --nav:#10182f;
+      --nav-2:#15203d;
+      --bg:#eef5ff;
+      --card:#ffffff;
+      --text:#172033;
+      --sub:#647086;
+      --weak:#9aa7b8;
+      --line:#dce8f7;
+      --line2:#c7d9ef;
+      --blue:#2f80ed;
+      --blue2:#5aa2ff;
+      --blueSoft:#eaf3ff;
+      --green:#18a058;
+      --greenSoft:#eaf8ef;
+      --orange:#f59e0b;
+      --orangeSoft:#fff5df;
+      --purple:#7c66f2;
+      --purpleSoft:#f1efff;
+      --red:#f05454;
+      --shadow:0 18px 46px rgba(31,67,120,.12);
+      --shadow2:0 10px 24px rgba(31,67,120,.08);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:linear-gradient(145deg,#eaf2ff 0%,#f8fbff 46%,#eef6ff 100%)}
+    body{overflow:hidden}
+    button,input{font-family:inherit}button{border:0;cursor:pointer}
+    .app{height:100vh;min-width:1280px;display:flex;flex-direction:column;overflow:hidden}
+
+    .topbar{height:66px;background:linear-gradient(180deg,var(--nav),var(--nav-2));color:#fff;display:grid;grid-template-columns:280px 1fr 430px;align-items:center;padding:0 34px;box-shadow:0 10px 30px rgba(7,16,38,.22);z-index:20}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:20px;letter-spacing:.2px}.brand-logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#5aa2ff,#8c76ff);display:grid;place-items:center;box-shadow:0 10px 20px rgba(47,128,237,.32)}.brand-logo:before{content:"◆";font-size:15px;color:#fff;transform:rotate(45deg)}
+    .nav{display:flex;justify-content:center;gap:52px;height:66px}.nav a{position:relative;height:66px;display:flex;align-items:center;color:#cfd8ef;text-decoration:none;font-weight:800}.nav a.active{color:#fff}.nav a.active:after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:34px;height:4px;border-radius:4px 4px 0 0;background:var(--blue2);box-shadow:0 0 16px rgba(90,162,255,.65)}
+    .top-right{display:flex;align-items:center;justify-content:flex-end;gap:14px}.search{height:38px;width:250px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);display:flex;align-items:center;padding:0 12px;gap:8px}.search input{flex:1;border:0;background:transparent;outline:0;color:#fff;font-size:13px}.search input::placeholder{color:#9aa7c8}.icon-btn{position:relative;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;font-size:18px}.badge-dot{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;border-radius:99px;background:var(--red);font-size:11px;font-weight:900;display:grid;place-items:center;border:2px solid var(--nav)}.user{display:flex;align-items:center;gap:9px;color:#eaf1ff;font-weight:800}.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d9e9ff,#7eaef7);display:grid;place-items:center;color:#17315a;font-weight:900;border:2px solid rgba(255,255,255,.35)}
+
+    .main{position:relative;flex:1;padding:28px 34px 18px;overflow:auto}.main:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 4%,rgba(47,128,237,.14),transparent 30%),radial-gradient(circle at 92% 8%,rgba(124,102,242,.12),transparent 34%);pointer-events:none}.main-inner{position:relative;z-index:1;max-width:1500px;margin:0 auto;display:grid;grid-template-columns:1.1fr .9fr 360px;grid-template-rows:auto auto auto;gap:14px}
+
+    .hero{grid-column:1/4;background:rgba(255,255,255,.88);border:1px solid rgba(207,222,246,.96);border-radius:24px;box-shadow:var(--shadow);min-height:164px;display:grid;grid-template-columns:minmax(0,1fr) 330px 450px;overflow:hidden}.hero-text{padding:30px 34px}.hero h1{margin:0 0 10px;font-size:28px;letter-spacing:.2px}.hero p{margin:0;color:var(--sub);font-size:15px;line-height:1.65}.hero-actions{display:flex;gap:14px;margin-top:22px}.primary-btn,.outline-btn{height:44px;border-radius:12px;padding:0 22px;font-weight:900;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}.primary-btn{background:linear-gradient(135deg,#2f80ed,#5aa2ff);color:#fff;box-shadow:0 14px 26px rgba(47,128,237,.28)}.outline-btn{background:#fff;color:#2f80ed;border:1px solid #bcd6fb}.hero-visual{position:relative;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(47,128,237,.06),rgba(124,102,242,.08))}.ai-illustration{width:240px;height:118px;border-radius:28px;background:linear-gradient(135deg,#f8fbff,#eaf3ff);border:1px solid #dce8f7;box-shadow:0 16px 36px rgba(47,128,237,.12);position:relative}.ai-illustration:before{content:"AI";position:absolute;left:24px;top:36px;width:54px;height:54px;border-radius:18px;background:linear-gradient(135deg,#2f80ed,#7c66f2);color:#fff;display:grid;place-items:center;font-weight:900;font-size:20px;box-shadow:0 12px 22px rgba(47,128,237,.25)}.ai-illustration:after{content:"";position:absolute;right:28px;top:24px;width:94px;height:70px;border-radius:18px;background:repeating-linear-gradient(180deg,#fff,#fff 12px,#e5eefb 13px,#e5eefb 14px);border:1px solid #dce8f7}.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:center;padding:28px 30px}.stat-card{height:84px;border-radius:18px;background:#fff;border:1px solid #dce8f7;display:grid;grid-template-columns:54px 1fr 18px;align-items:center;gap:12px;padding:0 14px;box-shadow:0 10px 22px rgba(31,67,120,.07)}.stat-ico{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;color:#fff;font-size:20px;font-weight:900}.stat-ico.blue{background:linear-gradient(135deg,#2f80ed,#5aa2ff)}.stat-ico.green{background:linear-gradient(135deg,#18a058,#6bd893)}.stat-ico.purple{background:linear-gradient(135deg,#7c66f2,#b197ff)}.stat-card span{font-size:12px;color:var(--sub);display:block}.stat-card b{font-size:23px;line-height:1.1}.chev{color:#8c99ad;font-weight:900}
+
+    .card{background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:20px;box-shadow:var(--shadow2);overflow:hidden}.card-head{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #e6eef8}.card-head h3{margin:0;font-size:16px;display:flex;align-items:center;gap:8px}.card-head h3:before{content:"";width:4px;height:16px;border-radius:4px;background:var(--blue)}.link{font-size:12px;color:var(--blue);font-weight:900;text-decoration:none}.card-body{padding:16px 18px}.calendar{grid-column:1/2;grid-row:2/3;min-height:390px}.calendar-top{height:46px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.month-nav{display:flex;align-items:center;gap:14px;font-weight:900}.nav-btn,.today-btn{height:32px;border-radius:10px;background:#f7fbff;border:1px solid #dce8f7;color:#53637a;font-weight:900;padding:0 10px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #e6eef8;border-left:1px solid #e6eef8}.day-name,.day{height:42px;border-right:1px solid #e6eef8;border-bottom:1px solid #e6eef8;display:flex;align-items:center;justify-content:center;font-size:12px;color:#728096}.day{height:54px;position:relative;font-weight:800;color:#1f2c41;background:#fff}.day.muted{color:#b8c1d1;background:#fbfdff}.day.active .num{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#2f80ed,#5aa2ff);color:#fff;display:grid;place-items:center;box-shadow:0 12px 22px rgba(47,128,237,.26)}.dots{position:absolute;bottom:7px;display:flex;gap:4px}.dot{width:5px;height:5px;border-radius:50%}.dot.blue{background:var(--blue)}.dot.purple{background:var(--purple)}.dot.orange{background:var(--orange)}.dot.green{background:var(--green)}.mini-label{position:absolute;bottom:4px;font-size:10px;font-weight:900}.mini-label.blue{color:var(--blue)}.mini-label.green{color:var(--green)}.mini-label.orange{color:var(--orange)}.legend{height:46px;display:flex;justify-content:center;gap:28px;align-items:center;color:#647086;font-size:12px}.legend span{display:flex;align-items:center;gap:7px}
+
+    .today{grid-column:2/3;grid-row:2/3}.task-list{display:flex;flex-direction:column;gap:11px}.task{height:58px;border:1px solid #e1eafa;border-radius:14px;background:#fff;display:grid;grid-template-columns:24px 1fr auto 50px;align-items:center;gap:10px;padding:0 12px}.checkbox{width:16px;height:16px;border-radius:5px;border:1px solid #c7d3e4}.task b{font-size:14px;display:block;margin-bottom:4px}.task span{font-size:12px;color:#75849a}.priority{font-size:11px;font-weight:900;color:#8a6a24}.status{height:24px;border-radius:8px;padding:0 8px;display:inline-flex;align-items:center;font-size:11px;font-weight:900}.status.blue{background:var(--blueSoft);color:var(--blue)}.status.orange{background:var(--orangeSoft);color:#b77900}.status.green{background:var(--greenSoft);color:#16864d}.status.gray{background:#f3f5f8;color:#8a96a8}.time{font-size:12px;color:#8b98aa;text-align:right}
+
+    .quick{grid-column:3/4;grid-row:2/3}.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.quick-item{height:86px;border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff);border:1px solid #dce8f7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#4b5b70;font-weight:900;font-size:13px}.quick-icon{width:36px;height:36px;border-radius:13px;display:grid;place-items:center;color:#fff;font-size:19px}.quick-icon.blue{background:linear-gradient(135deg,#2f80ed,#5aa2ff)}.quick-icon.green{background:linear-gradient(135deg,#18a058,#62d68c)}.quick-icon.orange{background:linear-gradient(135deg,#f59e0b,#ffbf56)}.quick-icon.purple{background:linear-gradient(135deg,#7c66f2,#ad99ff)}.quick-item small{font-size:11px;color:#8794a8;font-weight:700;margin-top:-4px}
+
+    .history{grid-column:1/2;grid-row:3/4}.history-list{display:flex;flex-direction:column}.history-item{min-height:52px;display:grid;grid-template-columns:1fr auto 130px 18px;align-items:center;gap:12px;border-bottom:1px solid #edf2f8}.history-item:last-child{border-bottom:0}.history-item b{font-size:13px}.history-item small{display:block;margin-top:4px;color:#8995a8}.recent{grid-column:2/3;grid-row:3/4}.recent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.recent-card{border:1px solid #e1eafa;border-radius:16px;overflow:hidden;background:#fff}.thumb{height:118px;background:linear-gradient(135deg,#f7fbff,#eef6ff);display:grid;place-items:center}.thumb.report:before{content:"报告";width:76px;height:92px;border-radius:12px;background:#fff;border:1px solid #dce8f7;display:grid;place-items:center;color:#2f80ed;font-weight:900;box-shadow:0 10px 22px rgba(31,67,120,.08)}.thumb.flow:before{content:"流程图";width:88px;height:70px;border-radius:16px;background:#fff;border:1px solid #dce8f7;display:grid;place-items:center;color:#7c66f2;font-weight:900}.thumb.html:before{content:"HTML";width:82px;height:82px;border-radius:20px;background:linear-gradient(135deg,#edeaff,#fff);border:1px solid #dfd9ff;display:grid;place-items:center;color:#7c66f2;font-weight:900;font-size:18px}.recent-info{padding:12px}.recent-info b{font-size:13px}.recent-info small{display:block;color:#8794a8;margin-top:5px}.skills{grid-column:3/4;grid-row:3/4}.skill-list{display:flex;flex-direction:column}.skill{min-height:54px;display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid #edf2f8}.skill:last-child{border-bottom:0}.skill-ico{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#fff}.skill-ico.purple{background:#9b87ff}.skill-ico.blue{background:#5aa2ff}.skill-ico.green{background:#55c98a}.skill-ico.orange{background:#ffad38}.skill b{font-size:13px}.skill small{color:#8995a8}.skill .tag{font-size:11px;height:22px;border-radius:999px;padding:0 8px;background:#eef6ff;color:#2f80ed;font-weight:900}.footer{grid-column:1/4;text-align:center;color:#9aa7b8;font-size:12px;padding:4px 0 2px}
+
+    @media(max-width:1400px){.main-inner{grid-template-columns:1fr 1fr 320px}.hero{grid-template-columns:minmax(0,1fr) 260px 400px}.topbar{padding:0 24px}.main{padding:22px 24px 16px}.nav{gap:34px}.search{width:220px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-logo"></div>任务方法沉淀平台</div>
+    <nav class="nav"><a class="active" href="#">首页</a><a href="#">任务区</a><a href="#">Skill 库</a><a href="#">设置</a></nav>
+    <div class="top-right">
+      <div class="search"><span>⌕</span><input placeholder="搜索任务、Skill、报告..." /></div>
+      <button class="icon-btn">♢<span class="badge-dot">5</span></button>
+      <div class="user"><div class="avatar">U</div><span>用户名</span><span>⌄</span></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="main-inner">
+      <section class="hero">
+        <div class="hero-text">
+          <h1>欢迎使用任务方法沉淀与 AI Skill 生成平台</h1>
+          <p>把任务过程沉淀成可复用流程，再转化为 AI 可执行的 Skill。</p>
+          <div class="hero-actions"><button class="primary-btn">＋ 新建任务</button><button class="outline-btn">✦ 从 Skill 创建</button></div>
+        </div>
+        <div class="hero-visual"><div class="ai-illustration"></div></div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-ico blue">◎</div><div><span>进行中任务</span><b>8</b></div><div class="chev">›</div></div>
+          <div class="stat-card"><div class="stat-ico green">✣</div><div><span>已沉淀 Skill</span><b>14</b></div><div class="chev">›</div></div>
+          <div class="stat-card"><div class="stat-ico purple">▣</div><div><span>本周报告</span><b>6</b></div><div class="chev">›</div></div>
+        </div>
+      </section>
+
+      <section class="card calendar">
+        <div class="card-head"><h3>任务日历</h3><a class="link" href="#">查看全部</a></div>
+        <div class="card-body">
+          <div class="calendar-top"><div class="month-nav"><button class="nav-btn">‹</button><span>2025年5月</span><button class="nav-btn">›</button></div><button class="today-btn">今天</button></div>
+          <div class="calendar-grid">
+            <div class="day-name">日</div><div class="day-name">一</div><div class="day-name">二</div><div class="day-name">三</div><div class="day-name">四</div><div class="day-name">五</div><div class="day-name">六</div>
+            <div class="day muted"><span class="num">27</span></div><div class="day muted"><span class="num">28</span></div><div class="day muted"><span class="num">29</span></div><div class="day muted"><span class="num">30</span></div><div class="day"><span class="num">1</span></div><div class="day"><span class="num">2</span><div class="dots"><i class="dot orange"></i></div></div><div class="day"><span class="num">3</span></div>
+            <div class="day"><span class="num">4</span></div><div class="day"><span class="num">5</span></div><div class="day"><span class="num">6</span><span class="mini-label blue">报告</span></div><div class="day"><span class="num">7</span></div><div class="day"><span class="num">8</span><span class="mini-label green">Skill</span></div><div class="day"><span class="num">9</span></div><div class="day"><span class="num">10</span></div>
+            <div class="day"><span class="num">11</span></div><div class="day"><span class="num">12</span></div><div class="day"><span class="num">13</span></div><div class="day"><span class="num">14</span></div><div class="day active"><span class="num">15</span><div class="dots"><i class="dot blue"></i></div></div><div class="day"><span class="num">16</span><span class="mini-label orange">任务</span></div><div class="day"><span class="num">17</span><div class="dots"><i class="dot orange"></i></div></div>
+            <div class="day"><span class="num">18</span></div><div class="day"><span class="num">19</span></div><div class="day"><span class="num">20</span></div><div class="day"><span class="num">21</span><span class="mini-label blue">报告</span></div><div class="day"><span class="num">22</span></div><div class="day"><span class="num">23</span><span class="mini-label green">Skill</span></div><div class="day"><span class="num">24</span></div>
+            <div class="day"><span class="num">25</span></div><div class="day"><span class="num">26</span></div><div class="day"><span class="num">27</span></div><div class="day"><span class="num">28</span><span class="mini-label orange">任务</span></div><div class="day"><span class="num">29</span></div><div class="day"><span class="num">30</span><span class="mini-label blue">报告</span></div><div class="day"><span class="num">31</span></div>
+          </div>
+          <div class="legend"><span><i class="dot orange"></i>任务 3</span><span><i class="dot green"></i>Skill 3</span><span><i class="dot blue"></i>报告 3</span><span><i class="dot"></i>其他 2</span></div>
+        </div>
+      </section>
+
+      <section class="card today">
+        <div class="card-head"><h3>今日待处理</h3><a class="link" href="#">查看全部（8）</a></div>
+        <div class="card-body task-list">
+          <div class="task"><span class="checkbox"></span><div><b>电商后台原型改造任务</b><span>高优先级</span></div><span class="status orange">进行中</span><span class="time">10:30</span></div>
+          <div class="task"><span class="checkbox"></span><div><b>生成原型设计 Skill 并沉淀</b><span>中优先级</span></div><span class="status blue">待处理</span><span class="time">14:00</span></div>
+          <div class="task"><span class="checkbox"></span><div><b>需求文档转流程图</b><span>中优先级</span></div><span class="status blue">待处理</span><span class="time">15:30</span></div>
+          <div class="task"><span class="checkbox"></span><div><b>市场周报生成与整理</b><span>低优先级</span></div><span class="status gray">未开始</span><span class="time">17:00</span></div>
+          <div class="task"><span class="checkbox"></span><div><b>竞品分析报告沉淀</b><span>低优先级</span></div><span class="status gray">未开始</span><span class="time">18:30</span></div>
+        </div>
+      </section>
+
+      <section class="card quick">
+        <div class="card-head"><h3>快速入口</h3></div>
+        <div class="card-body quick-grid">
+          <div class="quick-item"><div class="quick-icon blue">⌘</div>添加 HTML 成果<small>上传并沉淀成果</small></div>
+          <div class="quick-item"><div class="quick-icon green">▣</div>查看任务报告<small>浏览历史报告</small></div>
+          <div class="quick-item"><div class="quick-icon purple">⌁</div>生成流程图<small>AI 生成流程图</small></div>
+          <div class="quick-item"><div class="quick-icon orange">◎</div>进入 Skill 库<small>管理与复用 Skill</small></div>
+        </div>
+      </section>
+
+      <section class="card history">
+        <div class="card-head"><h3>历史任务</h3><a class="link" href="#">查看全部</a></div>
+        <div class="card-body history-list">
+          <div class="history-item"><div><b>企业官网改版原型设计</b><small>完成企业官网信息架构调整与原型设计</small></div><span class="status green">已完成</span><small>更新于 5月14日 18:20</small><span>›</span></div>
+          <div class="history-item"><div><b>产品需求分析与文档整理</b><small>梳理需求并输出 PRD 文档，待评审补充细节</small></div><span class="status orange">进行中</span><small>更新于 5月15日 09:15</small><span>›</span></div>
+          <div class="history-item"><div><b>行业竞品分析报告</b><small>完成主流竞品功能对比与分析，形成可视化结论报告</small></div><span class="status green">已完成</span><small>更新于 5月12日 17:45</small><span>›</span></div>
+        </div>
+      </section>
+
+      <section class="card recent">
+        <div class="card-head"><h3>最近沉淀</h3><a class="link" href="#">查看全部</a></div>
+        <div class="card-body recent-grid">
+          <div class="recent-card"><div class="thumb report"></div><div class="recent-info"><b>HTML 原型改造报告</b><small>报告 · 2 小时前</small></div></div>
+          <div class="recent-card"><div class="thumb flow"></div><div class="recent-info"><b>任务沉淀流程图</b><small>流程图 · 5 小时前</small></div></div>
+          <div class="recent-card"><div class="thumb html"></div><div class="recent-info"><b>Skill 草稿：生成原型</b><small>Skill 草稿 · 昨天 18:22</small></div></div>
+        </div>
+      </section>
+
+      <section class="card skills">
+        <div class="card-head"><h3>最近使用 Skill</h3><a class="link" href="#">查看全部</a></div>
+        <div class="card-body skill-list">
+          <div class="skill"><div class="skill-ico purple">✦</div><div><b>如何生成 HTML 原型</b><small>设计开发</small></div><span class="tag">使用 12 次</span></div>
+          <div class="skill"><div class="skill-ico blue">▤</div><div><b>如何拆解需求文档</b><small>需求分析</small></div><span class="tag">使用 9 次</span></div>
+          <div class="skill"><div class="skill-ico orange">◫</div><div><b>如何生成任务报告</b><small>报告生成</small></div><span class="tag">使用 8 次</span></div>
+          <div class="skill"><div class="skill-ico green">⌁</div><div><b>如何梳理流程图</b><small>流程梳理</small></div><span class="tag">使用 7 次</span></div>
+        </div>
+      </section>
+      <div class="footer">© 2025 任务方法沉淀平台 · 让任务方法更有价值</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

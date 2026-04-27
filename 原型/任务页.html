@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务方法沉淀平台 - 任务区原型</title>
+  <style>
+    :root{
+      --nav:#10182f;
+      --nav2:#15203d;
+      --bg:#eef5ff;
+      --card:#ffffff;
+      --text:#172033;
+      --sub:#6b7890;
+      --weak:#97a5b9;
+      --line:#dce8f7;
+      --line2:#c8daf1;
+      --blue:#2f80ed;
+      --blue2:#5aa2ff;
+      --blueSoft:#eef6ff;
+      --green:#18a058;
+      --greenSoft:#eaf8ef;
+      --orange:#f59e0b;
+      --orangeSoft:#fff5e6;
+      --purple:#7c66f2;
+      --purpleSoft:#f3f0ff;
+      --red:#ef5b5b;
+      --shadow:0 18px 46px rgba(31,67,120,.12);
+      --shadow2:0 10px 24px rgba(31,67,120,.08);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(145deg,#eaf2ff 0%,#f8fbff 45%,#eef6ff 100%);color:var(--text)}
+    body{overflow:hidden}
+    button,input,textarea{font-family:inherit}
+    button{border:0;cursor:pointer}
+    textarea,input{outline:none}
+    .app{height:100vh;min-width:1320px;display:flex;flex-direction:column;overflow:hidden}
+
+    /* top bar */
+    .topbar{
+      height:66px;
+      background:linear-gradient(180deg,var(--nav),var(--nav2));
+      color:#fff;
+      display:grid;
+      grid-template-columns:280px 1fr 430px;
+      align-items:center;
+      padding:0 34px;
+      box-shadow:0 10px 30px rgba(7,16,38,.22);
+      z-index:20;
+      flex-shrink:0;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;font-weight:900;font-size:20px;letter-spacing:.2px
+    }
+    .brand-logo{
+      width:32px;height:32px;border-radius:10px;
+      background:linear-gradient(135deg,#5aa2ff,#8c76ff);
+      display:grid;place-items:center;
+      box-shadow:0 10px 20px rgba(47,128,237,.32)
+    }
+    .brand-logo:before{
+      content:"◆";font-size:15px;color:#fff;transform:rotate(45deg)
+    }
+    .nav{
+      display:flex;justify-content:center;gap:52px;height:66px
+    }
+    .nav a{
+      position:relative;height:66px;display:flex;align-items:center;
+      color:#cfd8ef;text-decoration:none;font-weight:800
+    }
+    .nav a.active{color:#fff}
+    .nav a.active:after{
+      content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+      width:34px;height:4px;border-radius:4px 4px 0 0;background:var(--blue2)
+    }
+    .top-right{
+      display:flex;align-items:center;justify-content:flex-end;gap:14px
+    }
+    .search{
+      height:38px;width:240px;border-radius:13px;border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);display:flex;align-items:center;padding:0 12px;gap:8px
+    }
+    .search input{
+      flex:1;border:0;background:transparent;color:#fff;font-size:13px
+    }
+    .search input::placeholder{color:#9aa7c8}
+    .icon-btn{
+      width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;font-size:16px
+    }
+    .user{
+      display:flex;align-items:center;gap:9px;color:#eaf1ff;font-weight:800
+    }
+    .avatar{
+      width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d9e9ff,#7eaef7);
+      display:grid;place-items:center;color:#17315a;font-weight:900;border:2px solid rgba(255,255,255,.35)
+    }
+
+    .main{
+      position:relative;flex:1;padding:22px 28px 18px;overflow:hidden
+    }
+    .main:before{
+      content:"";position:absolute;inset:0;
+      background:
+        radial-gradient(circle at 12% 4%,rgba(47,128,237,.13),transparent 30%),
+        radial-gradient(circle at 92% 8%,rgba(124,102,242,.10),transparent 34%);
+      pointer-events:none
+    }
+    .main-inner{
+      position:relative;z-index:1;height:100%;max-width:1560px;margin:0 auto;
+      display:grid;grid-template-rows:auto auto 1fr;gap:14px
+    }
+
+    /* task header */
+    .task-header{
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(207,222,246,.96);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:18px 22px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:18px;
+      align-items:center;
+    }
+    .task-left{
+      display:flex;align-items:center;gap:16px;min-width:0
+    }
+    .back-btn{
+      width:42px;height:42px;border-radius:14px;background:#f5f9ff;border:1px solid var(--line);
+      color:#3d4d66;font-size:18px;font-weight:900
+    }
+    .task-title-wrap{min-width:0}
+    .task-title{
+      margin:0;font-size:22px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+    }
+    .task-meta{
+      margin-top:6px;display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub)
+    }
+    .meta-tag{
+      height:24px;padding:0 10px;border-radius:999px;
+      background:#f3f8ff;border:1px solid #d7e8fb;color:#2f80ed;font-weight:800;
+      display:inline-flex;align-items:center
+    }
+    .task-actions{display:flex;gap:10px;align-items:center}
+    .outline-btn,.primary-btn,.soft-btn{
+      height:40px;border-radius:12px;padding:0 16px;font-weight:900;font-size:14px
+    }
+    .outline-btn{
+      background:#fff;border:1px solid #d6e3f4;color:#44546c
+    }
+    .soft-btn{
+      background:#f2f7ff;border:1px solid #d7e6fb;color:#2f80ed
+    }
+    .primary-btn{
+      background:linear-gradient(135deg,#2f80ed,#5aa2ff);color:#fff;
+      box-shadow:0 14px 26px rgba(47,128,237,.25)
+    }
+
+    /* tabs */
+    .tab-bar{
+      background:rgba(255,255,255,.86);
+      border:1px solid rgba(207,222,246,.96);
+      border-radius:18px;
+      box-shadow:var(--shadow2);
+      padding:8px;
+      display:flex;align-items:center;justify-content:space-between;gap:14px
+    }
+    .tabs{
+      display:flex;gap:6px
+    }
+    .tab{
+      height:42px;padding:0 18px;border-radius:12px;background:transparent;color:#647086;
+      font-weight:900;border:1px solid transparent
+    }
+    .tab.active{
+      background:#fff;border-color:#d8e8fb;color:#2f80ed;
+      box-shadow:0 8px 18px rgba(37,86,156,.10)
+    }
+    .tab-info{
+      font-size:12px;color:var(--sub);padding-right:8px
+    }
+
+    /* content views */
+    .views{min-height:0;height:100%}
+    .view{
+      display:none;height:100%;
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(207,222,246,.96);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      overflow:hidden
+    }
+    .view.active{display:block}
+
+    /* work view */
+    .work-layout{
+      height:100%;
+      display:grid;
+      grid-template-columns:320px minmax(0,1fr) 330px;
+      gap:14px;
+      padding:14px;
+      min-height:0;
+    }
+    .panel{
+      background:#fff;border:1px solid #e0eafa;border-radius:20px;box-shadow:var(--shadow2);
+      display:flex;flex-direction:column;min-height:0;overflow:hidden
+    }
+    .panel-head{
+      height:56px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid #e8eff8;flex-shrink:0
+    }
+    .panel-head h3{
+      margin:0;font-size:15px;display:flex;align-items:center;gap:8px
+    }
+    .panel-head h3:before{
+      content:"";width:4px;height:16px;border-radius:4px;background:var(--blue)
+    }
+    .panel-body{
+      padding:14px;overflow:auto;min-height:0
+    }
+    .panel-body::-webkit-scrollbar{width:8px;height:8px}
+    .panel-body::-webkit-scrollbar-thumb{background:#cbd8e8;border-radius:10px}
+
+    .mini-card{
+      border:1px solid #e2ebf7;border-radius:16px;background:#fbfdff;padding:12px;margin-bottom:12px
+    }
+    .mini-card h4{
+      margin:0 0 8px;font-size:13px;color:#23334b
+    }
+    .mini-card p,.mini-card li{
+      margin:0;color:#647086;font-size:12px;line-height:1.65
+    }
+    .mini-card ul{padding-left:16px;margin:0}
+    .mini-note{
+      font-size:11px;color:#8a97ab;line-height:1.55
+    }
+
+    .field{
+      margin-bottom:12px
+    }
+    .field label{
+      display:block;font-size:12px;color:#66748b;font-weight:800;margin-bottom:6px
+    }
+    .field textarea,.field input{
+      width:100%;border:1px solid #dce8f7;background:#fff;border-radius:12px;
+      padding:10px 12px;color:#384960;font-size:13px;line-height:1.6
+    }
+    .field textarea{resize:vertical;min-height:70px}
+    .small-actions{
+      display:grid;grid-template-columns:1fr 1fr;gap:8px
+    }
+    .small-actions button{
+      height:34px;border-radius:10px;font-size:12px;font-weight:900;border:1px solid #d7e3f4
+    }
+    .small-actions .save{background:#2f80ed;color:#fff;border-color:#2f80ed}
+    .small-actions .preview{background:#fff;color:#4d5d74}
+
+    .asset-list{display:flex;flex-direction:column;gap:10px}
+    .asset-item{
+      border:1px solid #e1eafa;border-radius:14px;background:#fff;padding:12px;
+      transition:.2s
+    }
+    .asset-item.active{
+      border-color:#b9d5fb;background:#eff7ff
+    }
+    .asset-item b{
+      display:block;font-size:13px;color:#22334b;margin-bottom:5px
+    }
+    .asset-item span{
+      display:block;font-size:11px;color:#7f8ca0;line-height:1.55
+    }
+    .tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .tag{
+      height:22px;border-radius:999px;padding:0 8px;display:inline-flex;align-items:center;
+      font-size:11px;font-weight:900
+    }
+    .tag.blue{background:#eef6ff;color:#2f80ed}
+    .tag.green{background:#eaf8ef;color:#16864d}
+    .tag.orange{background:#fff5e6;color:#b37400}
+    .tag.purple{background:#f3f0ff;color:#7c66f2}
+    .tag.gray{background:#f3f5f8;color:#7d8aa0}
+
+    .workspace-main{
+      display:grid;grid-template-rows:auto auto 1fr;gap:14px;height:100%;min-height:0
+    }
+    .summary-strip{
+      border:1px solid #e0eafa;border-radius:18px;background:linear-gradient(180deg,#fbfdff,#f5f9ff);
+      padding:14px 16px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center
+    }
+    .summary-strip h2{
+      margin:0;font-size:20px
+    }
+    .summary-strip p{
+      margin:6px 0 0;color:#647086;font-size:13px;line-height:1.65
+    }
+    .summary-actions{display:flex;gap:8px}
+    .summary-actions button{
+      height:36px;padding:0 12px;border-radius:10px;font-size:12px;font-weight:900;
+      border:1px solid #d7e3f4;background:#fff;color:#506077
+    }
+    .summary-actions .blue{background:#eef6ff;color:#2f80ed;border-color:#cfe2ff}
+
+    .preview-card,.report-card{
+      border:1px solid #e1eafa;border-radius:20px;background:#fff;overflow:hidden;
+      box-shadow:var(--shadow2)
+    }
+    .preview-head,.report-head{
+      height:48px;padding:0 16px;border-bottom:1px solid #e9f0f8;display:flex;align-items:center;justify-content:space-between
+    }
+    .preview-head b,.report-head b{
+      font-size:14px
+    }
+    .preview-area{
+      padding:16px;height:260px;background:linear-gradient(180deg,#ffffff,#fbfdff)
+    }
+    .fake-frame{
+      height:100%;border:1px solid #dce8f7;border-radius:16px;background:#f7fbff;padding:18px;
+      overflow:auto
+    }
+    .fake-page{
+      background:#fff;border:1px solid #e1eafa;border-radius:18px;min-height:100%;
+      padding:18px;box-shadow:0 12px 24px rgba(31,67,120,.06)
+    }
+    .fake-page h4{margin:0 0 10px;font-size:18px}
+    .fake-page p{margin:0;color:#617088;font-size:13px;line-height:1.7}
+    .fake-blocks{
+      display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-top:14px
+    }
+    .fake-block{
+      min-height:90px;border-radius:14px;background:#f6faff;border:1px solid #dce8f7;padding:12px
+    }
+
+    .report-content{
+      padding:16px 18px 18px
+    }
+    .report-grid{
+      display:grid;grid-template-columns:1fr 1fr;gap:12px
+    }
+    .report-box{
+      border:1px solid #e1eafa;border-radius:16px;background:#fbfdff;padding:14px
+    }
+    .report-box b{
+      display:block;font-size:13px;margin-bottom:6px;color:#22334b
+    }
+    .report-box span{
+      display:block;font-size:12px;color:#647086;line-height:1.65
+    }
+
+    .check-list{display:flex;flex-direction:column;gap:10px}
+    .check-item{
+      border:1px solid #e1eafa;border-radius:14px;background:#fbfdff;padding:12px
+    }
+    .check-item b{
+      display:block;font-size:13px;margin-bottom:4px
+    }
+    .check-item span{
+      font-size:12px;color:#6d7a90;line-height:1.6
+    }
+
+    /* report view */
+    .report-layout{
+      height:100%;display:grid;grid-template-columns:280px minmax(0,1fr) 320px;gap:14px;padding:14px
+    }
+    .doc-list{display:flex;flex-direction:column;gap:10px}
+    .doc-item{
+      padding:12px;border:1px solid #e1eafa;border-radius:14px;background:#fff
+    }
+    .doc-item.active{background:#eef6ff;border-color:#b7d4fb}
+    .doc-item b{display:block;font-size:13px;margin-bottom:4px}
+    .doc-item span{font-size:11px;color:#8290a5}
+    .editor-card{
+      background:#fff;border:1px solid #e1eafa;border-radius:20px;overflow:auto
+    }
+    .editor-head{
+      position:sticky;top:0;z-index:2;background:#fff;height:56px;padding:0 18px;
+      border-bottom:1px solid #e9f0f8;display:flex;align-items:center;justify-content:space-between
+    }
+    .editor-body{padding:18px}
+    .section{
+      margin-bottom:14px;border:1px solid #e1eafa;border-radius:18px;background:#fbfdff;padding:14px
+    }
+    .section label{
+      display:block;font-size:13px;font-weight:900;color:#22334b;margin-bottom:8px
+    }
+    .section textarea{
+      width:100%;min-height:92px;border:1px solid #dce8f7;border-radius:12px;padding:12px;
+      background:#fff;font-size:13px;line-height:1.7;color:#384960;resize:vertical
+    }
+    .info-side{display:flex;flex-direction:column;gap:12px}
+    .side-note{
+      border:1px solid #e1eafa;border-radius:16px;background:#fff;padding:14px
+    }
+    .side-note b{display:block;font-size:13px;margin-bottom:6px}
+    .side-note p{margin:0;font-size:12px;color:#647086;line-height:1.65}
+
+    /* flow view */
+    .flow-layout{
+      height:100%;display:grid;grid-template-columns:300px minmax(0,1fr) 320px;gap:14px;padding:14px
+    }
+    .flow-canvas{
+      position:relative;border:1px dashed #bed5f5;border-radius:22px;background:
+        linear-gradient(135deg,#f8fbff,#eef6ff);
+      overflow:hidden;min-height:0
+    }
+    .flow-canvas:before{
+      content:"";position:absolute;inset:0;
+      background-image:
+        linear-gradient(#dbe8f8 1px,transparent 1px),
+        linear-gradient(90deg,#dbe8f8 1px,transparent 1px);
+      background-size:28px 28px;opacity:.45
+    }
+    .node{
+      position:absolute;z-index:2;width:156px;min-height:78px;border-radius:18px;background:#fff;
+      border:1px solid #cfe0f6;box-shadow:0 12px 24px rgba(47,128,237,.12);padding:12px
+    }
+    .node b{display:block;font-size:13px;margin-bottom:6px}
+    .node span{font-size:11px;color:#718096;line-height:1.45}
+    .node.active{border-color:#2f80ed;box-shadow:0 16px 30px rgba(47,128,237,.18)}
+    .node.n1{left:48px;top:90px}
+    .node.n2{left:270px;top:90px}
+    .node.n3{left:492px;top:90px}
+    .node.n4{left:270px;top:250px}
+    .node.n5{left:492px;top:250px}
+    .flow-svg{position:absolute;inset:0;z-index:1}
+    .prop-group{
+      margin-bottom:12px
+    }
+    .prop-group label{
+      display:block;font-size:12px;color:#66748b;font-weight:800;margin-bottom:6px
+    }
+    .prop-group input,.prop-group textarea{
+      width:100%;border:1px solid #dce8f7;border-radius:12px;padding:10px 12px;background:#fff;
+      font-size:13px;color:#384960
+    }
+    .prop-group textarea{height:88px;resize:none}
+
+    /* skill view */
+    .skill-layout{
+      height:100%;display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;padding:14px
+    }
+    .skill-card{
+      background:#fff;border:1px solid #e1eafa;border-radius:20px;overflow:auto
+    }
+    .skill-card-head{
+      position:sticky;top:0;background:#fff;height:56px;padding:0 18px;border-bottom:1px solid #e9f0f8;
+      display:flex;align-items:center;justify-content:space-between
+    }
+    .skill-card-body{padding:18px}
+    .skill-section{
+      border:1px solid #e1eafa;border-radius:18px;background:#fbfdff;padding:14px;margin-bottom:12px
+    }
+    .skill-section h4{
+      margin:0 0 8px;font-size:14px
+    }
+    .skill-section p,.skill-section li{
+      margin:0;color:#647086;font-size:13px;line-height:1.7
+    }
+    .skill-section ul{padding-left:18px;margin:0}
+    .skill-sidebar .mini-card:last-child{margin-bottom:0}
+
+    @media (max-width: 1480px){
+      .topbar{padding:0 24px;grid-template-columns:250px 1fr 380px}
+      .nav{gap:34px}
+      .main{padding:18px 22px 16px}
+      .work-layout{grid-template-columns:300px minmax(0,1fr) 310px}
+      .report-layout{grid-template-columns:250px minmax(0,1fr) 290px}
+      .flow-layout{grid-template-columns:270px minmax(0,1fr) 290px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo"></div>
+      任务方法沉淀平台
+    </div>
+    <nav class="nav">
+      <a href="#">首页</a>
+      <a class="active" href="#">任务区</a>
+      <a href="#">Skill 库</a>
+      <a href="#">设置</a>
+    </nav>
+    <div class="top-right">
+      <div class="search">
+        <span>⌕</span>
+        <input placeholder="搜索任务、Skill、报告..." />
+      </div>
+      <button class="icon-btn">⎘</button>
+      <div class="user">
+        <div class="avatar">U</div>
+        <span>用户名</span>
+        <span>⌄</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="main-inner">
+
+      <section class="task-header">
+        <div class="task-left">
+          <button class="back-btn">←</button>
+          <div class="task-title-wrap">
+            <h1 class="task-title">任务标题：HTML 原型设计平台任务区重构</h1>
+            <div class="task-meta">
+              <span class="meta-tag">进行中</span>
+              <span>创建时间：2026-04-27</span>
+              <span>最后更新：今天 18:36</span>
+              <span>关联 HTML 成果：3 个</span>
+              <span>已生成报告：1 版</span>
+            </div>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="outline-btn">导出任务包</button>
+          <button class="soft-btn">复制报告输入</button>
+          <button class="outline-btn">保存当前</button>
+          <button class="primary-btn">生成任务报告</button>
+        </div>
+      </section>
+
+      <section class="tab-bar">
+        <div class="tabs">
+          <button class="tab active" data-tab="work">工作视图</button>
+          <button class="tab" data-tab="report">当前任务报告</button>
+          <button class="tab" data-tab="flow">流程图</button>
+          <button class="tab" data-tab="skill">Skill 化</button>
+        </div>
+        <div class="tab-info">当前任务围绕：任务上下文 → HTML 成果 → 任务报告 → 流程图 → Skill 沉淀</div>
+      </section>
+
+      <section class="views">
+
+        <!-- 工作视图 -->
+        <div class="view active" id="view-work">
+          <div class="work-layout">
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h3>任务素材</h3>
+                <button class="soft-btn" style="height:34px;padding:0 12px;font-size:12px">任务上下文</button>
+              </div>
+              <div class="panel-body">
+                <div class="mini-card">
+                  <h4>报告输入预览</h4>
+                  <p class="mini-note">
+                    AI 生成任务报告时，将读取任务上下文、HTML 成果和当前整理，
+                    按固定模板输出，不允许自由变更章节结构。
+                  </p>
+                  <div class="tag-row">
+                    <span class="tag blue">报告对象：当前任务</span>
+                    <span class="tag purple">模板：固定六章</span>
+                    <span class="tag green">输出：报告+整理+流程图</span>
+                  </div>
+                </div>
+
+                <div class="mini-card">
+                  <h4>任务上下文</h4>
+                  <ul>
+                    <li>目标：重构任务区原型页面</li>
+                    <li>约束：不做平台内自由 AI 对话</li>
+                    <li>要求：支持任务报告、流程图、Skill 化</li>
+                  </ul>
+                </div>
+
+                <div class="mini-card">
+                  <h4>粘贴 HTML 成果</h4>
+                  <div class="field">
+                    <label>HTML 代码入口（轻量）</label>
+                    <textarea id="htmlInput" placeholder="粘贴 HTML 代码..."><section style="padding:24px;font-family:Arial;background:#f7fbff;border-radius:18px"><h2 style="margin:0 0 10px;color:#1f2c41">任务区原型预览</h2><p style="margin:0;color:#617088">这里显示粘贴后 HTML 的预览效果，用户主要查看结果而不是看代码。</p></section></textarea>
+                  </div>
+                  <div class="small-actions">
+                    <button class="preview" id="previewHtmlBtn">临时预览</button>
+                    <button class="save">保存成果</button>
+                  </div>
+                </div>
+
+                <div class="mini-card" style="margin-bottom:0">
+                  <h4>HTML 成果列表</h4>
+                  <div class="asset-list">
+                    <div class="asset-item active">
+                      <b>任务区三栏布局版</b>
+                      <span>当前用于任务区展示，包含任务上下文、预览和整理区。</span>
+                      <div class="tag-row">
+                        <span class="tag blue">当前预览</span>
+                        <span class="tag gray">今天 18:36</span>
+                      </div>
+                    </div>
+                    <div class="asset-item">
+                      <b>首页原型最终版</b>
+                      <span>已完成首页日历、历史任务、最近沉淀、Skill 区域展示。</span>
+                      <div class="tag-row">
+                        <span class="tag green">已保存</span>
+                        <span class="tag gray">今天 17:22</span>
+                      </div>
+                    </div>
+                    <div class="asset-item">
+                      <b>记录页卡片样式草稿</b>
+                      <span>旧版本页面，仅作为样式参考，不纳入当前任务报告。</span>
+                      <div class="tag-row">
+                        <span class="tag orange">草稿</span>
+                        <span class="tag gray">昨天 22:18</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <section class="workspace-main">
+              <div class="summary-strip">
+                <div>
+                  <h2>当前成果：HTML 原型预览 + 当前任务报告预览</h2>
+                  <p>
+                    工作视图用于收集任务材料、保存 HTML 成果、查看预览，并在同一页面中快速看到当前任务报告的模板化结果。
+                  </p>
+                </div>
+                <div class="summary-actions">
+                  <button>复制报告</button>
+                  <button class="blue">保存到沉淀</button>
+                  <button>导出 Markdown</button>
+                </div>
+              </div>
+
+              <div class="preview-card">
+                <div class="preview-head">
+                  <b>HTML 预览</b>
+                  <span style="font-size:12px;color:#8090a6">来自左侧 HTML 成果入口</span>
+                </div>
+                <div class="preview-area">
+                  <div class="fake-frame">
+                    <div class="fake-page" id="htmlPreview">
+                      <h4>任务区原型预览</h4>
+                      <p>这里显示粘贴的 HTML 最终预览效果。平台中用户主要看结果，不需要阅读代码。</p>
+                      <div class="fake-blocks">
+                        <div class="fake-block">
+                          <b style="display:block;font-size:13px;margin-bottom:6px">任务上下文</b>
+                          <span style="font-size:12px;color:#647086;line-height:1.6">目标、背景、约束、判断标准。</span>
+                        </div>
+                        <div class="fake-block">
+                          <b style="display:block;font-size:13px;margin-bottom:6px">当前任务报告</b>
+                          <span style="font-size:12px;color:#647086;line-height:1.6">按模板生成当前任务的核心结论和行动建议。</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="report-card">
+                <div class="report-head">
+                  <b>当前任务报告预览</b>
+                  <span style="font-size:12px;color:#8090a6">模板生成 · 六个章节</span>
+                </div>
+                <div class="report-content">
+                  <div class="report-grid">
+                    <div class="report-box">
+                      <b>一、任务概述</b>
+                      <span>本任务围绕任务区页面原型设计展开，目标是形成统一、可继续迭代的任务工作台。</span>
+                    </div>
+                    <div class="report-box">
+                      <b>二、上下文依据</b>
+                      <span>依据任务目标、页面改造要求、平台边界和当前信息架构进行整理。</span>
+                    </div>
+                    <div class="report-box">
+                      <b>三、HTML 成果说明</b>
+                      <span>保存有价值的 HTML 原型成果，用于后续预览、报告引用和 Skill 提炼。</span>
+                    </div>
+                    <div class="report-box">
+                      <b>四、当前结论</b>
+                      <span>任务区需拆为工作视图、当前任务报告、流程图、Skill 化四个核心视图。</span>
+                    </div>
+                    <div class="report-box">
+                      <b>五、风险边界</b>
+                      <span>平台不做平台内自由 AI 对话，而是通过模板约束 AI 结构化回写。</span>
+                    </div>
+                    <div class="report-box">
+                      <b>六、后续行动与流程图建议</b>
+                      <span>继续完善任务区交互，并将流程节点与 Skill 草稿联动生成。</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h3>当前整理</h3>
+                <button class="soft-btn" style="height:34px;padding:0 12px;font-size:12px">模板规则</button>
+              </div>
+              <div class="panel-body">
+                <div class="check-list">
+                  <div class="check-item">
+                    <b>① 当前结论</b>
+                    <span>任务区需要围绕当前任务的执行过程展开，不再混入全局设置内容。</span>
+                  </div>
+                  <div class="check-item">
+                    <b>② 关键依据</b>
+                    <span>基于任务方法沉淀平台定位，页面需支撑上下文、HTML 成果、任务报告、流程图和 Skill 草稿。</span>
+                  </div>
+                  <div class="check-item">
+                    <b>③ 待确认问题</b>
+                    <span>Skill 化页面中，是否需要支持一键生成复用 Prompt 和执行检查清单。</span>
+                  </div>
+                  <div class="check-item">
+                    <b>④ 行动项</b>
+                    <span>继续输出任务区原型；之后补充设置页和 Skill 库页面。</span>
+                  </div>
+                  <div class="check-item">
+                    <b>⑤ 流程图节点</b>
+                    <span>填写上下文 → 粘贴 HTML 成果 → 生成任务报告 → 确认整理 → 生成流程图 → Skill 化。</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+          </div>
+        </div>
+
+        <!-- 当前任务报告 -->
+        <div class="view" id="view-report">
+          <div class="report-layout">
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h3>报告目录</h3>
+                <button class="soft-btn" style="height:34px;padding:0 12px;font-size:12px">新建版本</button>
+              </div>
+              <div class="panel-body">
+                <div class="doc-list">
+                  <div class="doc-item active">
+                    <b>当前任务报告 V1</b>
+                    <span>模板：固定六章 · 更新时间：今天 18:36</span>
+                  </div>
+                  <div class="doc-item">
+                    <b>报告生成记录</b>
+                    <span>记录 AI 生成时间、模板版本与回写结果。</span>
+                  </div>
+                  <div class="doc-item">
+                    <b>导出结果</b>
+                    <span>支持导出 Markdown / HTML / 任务包。</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <section class="editor-card">
+              <div class="editor-head">
+                <b>当前任务报告编辑区</b>
+                <div style="display:flex;gap:8px">
+                  <button class="outline-btn" style="height:34px;padding:0 12px;font-size:12px">校验结构</button>
+                  <button class="primary-btn" style="height:34px;padding:0 12px;font-size:12px">保存报告</button>
+                </div>
+              </div>
+              <div class="editor-body">
+                <div class="section">
+                  <label>一、任务概述</label>
+                  <textarea>本任务围绕任务方法沉淀平台的任务区页面设计展开，目标是在一个统一工作区中承载任务上下文、HTML 成果、当前任务报告、流程图和 Skill 化内容。</textarea>
+                </div>
+                <div class="section">
+                  <label>二、上下文依据</label>
+                  <textarea>根据当前平台定位，任务区需要服务于“任务执行过程沉淀”，而不是简单任务管理。页面需体现方法沉淀逻辑和 AI 按模板协作的能力。</textarea>
+                </div>
+                <div class="section">
+                  <label>三、HTML 成果说明</label>
+                  <textarea>页面支持粘贴和保存 HTML 原型成果，用户不需要理解代码本身，重点在于查看预览结果，并把成果纳入当前任务报告。</textarea>
+                </div>
+                <div class="section">
+                  <label>四、当前结论</label>
+                  <textarea>任务区建议拆分为四个视图：工作视图、当前任务报告、流程图、Skill 化。这样既能支撑当前任务处理，也为后续复用提供基础。</textarea>
+                </div>
+                <div class="section">
+                  <label>五、风险边界</label>
+                  <textarea>平台不提供自由 AI 聊天能力，AI 的角色是按照平台定义好的模板处理输入并返回结构化结果，避免换模型后内容失控。</textarea>
+                </div>
+                <div class="section" style="margin-bottom:0">
+                  <label>六、后续行动与流程图建议</label>
+                  <textarea>继续补充设置页、Skill 库和报告生成规则；流程图建议围绕“上下文输入—成果保存—报告生成—人工确认—Skill 提炼”展开。</textarea>
+                </div>
+              </div>
+            </section>
+
+            <aside class="info-side">
+              <div class="side-note">
+                <b>报告模板规则</b>
+                <p>当前任务报告使用固定六章模板，AI 输出必须匹配章节名称和字段结构，不允许自由增删。</p>
+              </div>
+              <div class="side-note">
+                <b>引用成果</b>
+                <p>当前已关联首页原型、任务区原型、旧版记录页草稿等 3 个 HTML 成果。</p>
+              </div>
+              <div class="side-note">
+                <b>生成建议</b>
+                <p>后续可增加“报告结构校验结果”区域，用于提醒缺失字段和不符合模板的返回内容。</p>
+              </div>
+            </aside>
+
+          </div>
+        </div>
+
+        <!-- 流程图 -->
+        <div class="view" id="view-flow">
+          <div class="flow-layout">
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h3>流程图结构</h3>
+                <button class="soft-btn" style="height:34px;padding:0 12px;font-size:12px">AI 生成</button>
+              </div>
+              <div class="panel-body">
+                <div class="asset-list">
+                  <div class="asset-item active">
+                    <b>任务执行主流程</b>
+                    <span>任务上下文 → HTML 成果 → 任务报告 → 流程图 → Skill 化</span>
+                  </div>
+                  <div class="asset-item">
+                    <b>HTML 成果处理流程</b>
+                    <span>粘贴代码 → 预览 → 保存 → 纳入报告</span>
+                  </div>
+                  <div class="asset-item">
+                    <b>Skill 提炼流程</b>
+                    <span>报告完成 → 提取流程 → 生成 Skill 草稿 → 保存到 Skill 库</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <section class="flow-canvas">
+              <svg class="flow-svg" viewBox="0 0 780 430" preserveAspectRatio="none">
+                <path d="M204 128 C230 128,244 128,270 128" stroke="#7fb0ef" stroke-width="3" fill="none"/>
+                <path d="M426 128 C452 128,466 128,492 128" stroke="#7fb0ef" stroke-width="3" fill="none"/>
+                <path d="M348 168 C348 212,348 220,348 250" stroke="#7fb0ef" stroke-width="3" fill="none"/>
+                <path d="M426 288 C452 288,466 288,492 288" stroke="#7fb0ef" stroke-width="3" fill="none"/>
+              </svg>
+              <div class="node n1">
+                <b>整理上下文</b>
+                <span>填写任务目标、背景、约束和判断标准。</span>
+              </div>
+              <div class="node n2 active">
+                <b>保存 HTML 成果</b>
+                <span>粘贴代码并查看预览，保存有效页面成果。</span>
+              </div>
+              <div class="node n3">
+                <b>生成任务报告</b>
+                <span>按固定模板输出当前任务报告。</span>
+              </div>
+              <div class="node n4">
+                <b>人工确认整理</b>
+                <span>确认结论、行动项和流程节点。</span>
+              </div>
+              <div class="node n5">
+                <b>提炼为 Skill</b>
+                <span>提取可复用方法，形成 Skill 草稿。</span>
+              </div>
+            </section>
+
+            <aside class="panel">
+              <div class="panel-head">
+                <h3>节点编辑</h3>
+                <button class="soft-btn" style="height:34px;padding:0 12px;font-size:12px">保存节点</button>
+              </div>
+              <div class="panel-body">
+                <div class="prop-group">
+                  <label>节点标题</label>
+                  <input value="保存 HTML 成果" />
+                </div>
+                <div class="prop-group">
+                  <label>节点说明</label>
+                  <textarea>用户从外部 AI 或设计工具中复制 HTML 原型代码，平台负责进行预览和保存，用户重点关注页面效果而不是代码本身。</textarea>
+                </div>
+                <div class="prop-group">
+                  <label>节点类型</label>
+                  <input value="成果输入节点" />
+                </div>
+                <div class="prop-group">
+                  <label>连线说明</label>
+                  <input value="连接到：生成任务报告" />
+                </div>
+                <button class="primary-btn" style="width:100%;height:38px">保存当前修改</button>
+              </div>
+            </aside>
+
+          </div>
+        </div>
+
+        <!-- Skill 化 -->
+        <div class="view" id="view-skill">
+          <div class="skill-layout">
+
+            <aside class="panel skill-sidebar">
+              <div class="panel-head">
+                <h3>Skill 化入口</h3>
+                <button class="primary-btn" style="height:34px;padding:0 12px;font-size:12px">生成 Skill 草稿</button>
+              </div>
+              <div class="panel-body">
+                <div class="mini-card">
+                  <h4>Skill 化目的</h4>
+                  <p>把当前任务中的方法、步骤、判断标准和 AI 协作规则提取出来，形成下次可复用的 Skill。</p>
+                </div>
+                <div class="mini-card">
+                  <h4>提取来源</h4>
+                  <ul>
+                    <li>任务上下文</li>
+                    <li>HTML 成果</li>
+                    <li>当前任务报告</li>
+                    <li>流程图节点</li>
+                    <li>当前整理内容</li>
+                  </ul>
+                </div>
+                <div class="mini-card">
+                  <h4>生成后动作</h4>
+                  <p>可继续编辑 Skill 草稿，并保存到 Skill 库，供后续“从 Skill 创建任务”复用。</p>
+                </div>
+              </div>
+            </aside>
+
+            <section class="skill-card">
+              <div class="skill-card-head">
+                <b>Skill 草稿：如何设计任务方法沉淀平台的任务区原型</b>
+                <div style="display:flex;gap:8px">
+                  <button class="outline-btn" style="height:34px;padding:0 12px;font-size:12px">预览 JSON</button>
+                  <button class="primary-btn" style="height:34px;padding:0 12px;font-size:12px">保存到 Skill 库</button>
+                </div>
+              </div>
+              <div class="skill-card-body">
+                <div class="skill-section">
+                  <h4>适用场景</h4>
+                  <p>当用户需要为“任务方法沉淀平台”设计任务区页面，并希望在一个页面中承载任务执行、报告生成和方法沉淀能力时使用。</p>
+                </div>
+                <div class="skill-section">
+                  <h4>输入材料</h4>
+                  <ul>
+                    <li>任务需求文档</li>
+                    <li>当前页面截图或旧版原型</li>
+                    <li>产品定位与边界</li>
+                    <li>已有首页原型或设计风格</li>
+                  </ul>
+                </div>
+                <div class="skill-section">
+                  <h4>执行流程</h4>
+                  <ul>
+                    <li>阅读需求，明确任务区定位</li>
+                    <li>拆解任务区核心视图</li>
+                    <li>规划三栏工作视图结构</li>
+                    <li>定义任务报告页面</li>
+                    <li>定义流程图页面</li>
+                    <li>定义 Skill 化页面</li>
+                    <li>输出 HTML 原型并迭代优化</li>
+                  </ul>
+                </div>
+                <div class="skill-section">
+                  <h4>AI 分工</h4>
+                  <p>AI 负责梳理结构、生成 HTML 原型、总结任务报告和提取 Skill 草稿；用户负责判断信息层级、审美表现和产品概念是否清晰。</p>
+                </div>
+                <div class="skill-section">
+                  <h4>判断标准</h4>
+                  <ul>
+                    <li>页面结构清晰，不堆功能</li>
+                    <li>每个视图边界明确</li>
+                    <li>当前任务报告可模板化生成</li>
+                    <li>流程图和 Skill 化具有后续扩展空间</li>
+                  </ul>
+                </div>
+                <div class="skill-section" style="margin-bottom:0">
+                  <h4>输出物</h4>
+                  <p>任务区 HTML 原型、当前任务报告、流程图结构、Skill 草稿。</p>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const views = {
+    work: document.getElementById('view-work'),
+    report: document.getElementById('view-report'),
+    flow: document.getElementById('view-flow'),
+    skill: document.getElementById('view-skill')
+  };
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      Object.values(views).forEach(v => v.classList.remove('active'));
+      views[tab.dataset.tab].classList.add('active');
+    });
+  });
+
+  const previewBtn = document.getElementById('previewHtmlBtn');
+  const htmlInput = document.getElementById('htmlInput');
+  const htmlPreview = document.getElementById('htmlPreview');
+
+  previewBtn.addEventListener('click', () => {
+    htmlPreview.innerHTML = htmlInput.value;
+  });
+</script>
+</body>
+</html>

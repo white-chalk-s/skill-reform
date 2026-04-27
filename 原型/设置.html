@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务方法沉淀平台 - 设置页原型</title>
+  <style>
+    :root{
+      --nav:#10182f;
+      --nav2:#15203d;
+      --bg:#eef5ff;
+      --card:#ffffff;
+      --text:#172033;
+      --sub:#647086;
+      --weak:#9aa7b8;
+      --line:#dce8f7;
+      --line2:#c8daf1;
+      --blue:#2f80ed;
+      --blue2:#5aa2ff;
+      --blueSoft:#eef6ff;
+      --green:#18a058;
+      --greenSoft:#eaf8ef;
+      --orange:#f59e0b;
+      --orangeSoft:#fff5e6;
+      --purple:#7c66f2;
+      --purpleSoft:#f3f0ff;
+      --red:#ef5b5b;
+      --redSoft:#fff0f0;
+      --shadow:0 18px 46px rgba(31,67,120,.12);
+      --shadow2:0 10px 24px rgba(31,67,120,.08);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      height:100%;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+      background:linear-gradient(145deg,#eaf2ff 0%,#f8fbff 45%,#eef6ff 100%);
+      color:var(--text);
+    }
+    body{overflow:hidden}
+    button,input,textarea,select{font-family:inherit}
+    button{border:0;cursor:pointer}
+    input,textarea,select{outline:none}
+    .app{height:100vh;min-width:1320px;display:flex;flex-direction:column;overflow:hidden}
+
+    .topbar{
+      height:66px;
+      background:linear-gradient(180deg,var(--nav),var(--nav2));
+      color:#fff;
+      display:grid;
+      grid-template-columns:280px 1fr 430px;
+      align-items:center;
+      padding:0 34px;
+      box-shadow:0 10px 30px rgba(7,16,38,.22);
+      z-index:20;
+      flex-shrink:0;
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:20px;letter-spacing:.2px}
+    .brand-logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#5aa2ff,#8c76ff);display:grid;place-items:center;box-shadow:0 10px 20px rgba(47,128,237,.32)}
+    .brand-logo:before{content:"◆";font-size:15px;color:#fff;transform:rotate(45deg)}
+    .nav{display:flex;justify-content:center;gap:52px;height:66px}
+    .nav a{position:relative;height:66px;display:flex;align-items:center;color:#cfd8ef;text-decoration:none;font-weight:800}
+    .nav a.active{color:#fff}
+    .nav a.active:after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:34px;height:4px;border-radius:4px 4px 0 0;background:var(--blue2);box-shadow:0 0 16px rgba(90,162,255,.65)}
+    .top-right{display:flex;align-items:center;justify-content:flex-end;gap:14px}
+    .search{height:38px;width:250px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);display:flex;align-items:center;padding:0 12px;gap:8px}
+    .search input{flex:1;border:0;background:transparent;color:#fff;font-size:13px}
+    .search input::placeholder{color:#9aa7c8}
+    .icon-btn{position:relative;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;font-size:16px}
+    .badge-dot{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;border-radius:99px;background:var(--red);font-size:11px;font-weight:900;display:grid;place-items:center;border:2px solid var(--nav)}
+    .user{display:flex;align-items:center;gap:9px;color:#eaf1ff;font-weight:800}
+    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d9e9ff,#7eaef7);display:grid;place-items:center;color:#17315a;font-weight:900;border:2px solid rgba(255,255,255,.35)}
+
+    .main{position:relative;flex:1;padding:22px 28px 18px;overflow:hidden}
+    .main:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 4%,rgba(47,128,237,.13),transparent 30%),radial-gradient(circle at 92% 8%,rgba(124,102,242,.11),transparent 34%);pointer-events:none}
+    .main-inner{position:relative;z-index:1;height:100%;max-width:1560px;margin:0 auto;display:grid;grid-template-rows:auto 1fr;gap:14px}
+
+    .hero{
+      background:rgba(255,255,255,.9);
+      border:1px solid rgba(207,222,246,.96);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:20px 22px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 520px;
+      gap:18px;
+      align-items:center;
+    }
+    .hero h1{margin:0 0 8px;font-size:24px;font-weight:900}
+    .hero p{margin:0;color:var(--sub);font-size:14px;line-height:1.65}
+    .hero-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+    .primary-btn,.outline-btn,.soft-btn,.ghost-btn{height:40px;border-radius:12px;padding:0 16px;font-weight:900;font-size:14px}
+    .primary-btn{background:linear-gradient(135deg,#2f80ed,#5aa2ff);color:#fff;box-shadow:0 14px 26px rgba(47,128,237,.25)}
+    .outline-btn{background:#fff;border:1px solid #d6e3f4;color:#44546c}
+    .soft-btn{background:#f2f7ff;border:1px solid #d7e6fb;color:#2f80ed}
+    .ghost-btn{background:#f6f8fc;color:#5a687e;border:1px solid #dce8f7}
+
+    .content{display:grid;grid-template-columns:286px minmax(0,1fr) 360px;gap:14px;min-height:0}
+    .panel{background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;min-height:0;display:flex;flex-direction:column}
+    .panel-head{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #e6eef8;flex-shrink:0}
+    .panel-head h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
+    .panel-head h3:before{content:"";width:4px;height:16px;border-radius:4px;background:var(--blue)}
+    .panel-body{padding:14px;overflow:auto;min-height:0}
+    .panel-body::-webkit-scrollbar,.settings-scroll::-webkit-scrollbar,.code-box::-webkit-scrollbar{width:8px;height:8px}
+    .panel-body::-webkit-scrollbar-thumb,.settings-scroll::-webkit-scrollbar-thumb,.code-box::-webkit-scrollbar-thumb{background:#cbd8e8;border-radius:10px}
+
+    .nav-block{margin-bottom:14px}
+    .nav-title{font-size:12px;color:#7a879a;font-weight:900;margin:0 0 8px}
+    .setting-nav-item{height:42px;border-radius:13px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;margin-bottom:8px;background:#fff;border:1px solid #e4edf8;color:#4e5e75;font-weight:900;font-size:13px;transition:.18s}
+    .setting-nav-item:hover{border-color:#bdd7fb;transform:translateY(-1px)}
+    .setting-nav-item.active{background:#eef6ff;border-color:#b9d5fb;color:#2f80ed;box-shadow:0 8px 18px rgba(47,128,237,.08)}
+    .setting-nav-item small{color:#98a5b8;font-weight:900}
+    .status-card{border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbff);border:1px solid #e1eafa;padding:12px;margin-bottom:12px}
+    .status-card b{font-size:13px;display:block;margin-bottom:8px}
+    .status-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#647086;margin-bottom:7px}
+    .status-row:last-child{margin-bottom:0}
+    .status-dot{display:inline-flex;align-items:center;gap:6px}.status-dot:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
+
+    .settings-main{display:flex;flex-direction:column;min-height:0}
+    .section-toolbar{height:62px;background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:22px;box-shadow:var(--shadow2);padding:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin-bottom:14px}
+    .local-search{height:42px;border-radius:13px;background:#fff;border:1px solid #dce8f7;display:flex;align-items:center;gap:9px;padding:0 12px;color:#8a97ab}
+    .local-search input{flex:1;border:0;background:transparent;font-size:13px;color:#26364e}
+    .toolbar-actions{display:flex;gap:8px}
+    .settings-scroll{overflow:auto;min-height:0;padding:2px 4px 8px}
+
+    .setting-section{background:#fff;border:1px solid #e0eafa;border-radius:22px;box-shadow:var(--shadow2);overflow:hidden;margin-bottom:14px}
+    .section-head{height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8eff8;background:linear-gradient(180deg,#fff,#fbfdff)}
+    .section-head h2{margin:0;font-size:17px;display:flex;align-items:center;gap:10px}
+    .section-head h2 span{width:34px;height:34px;border-radius:13px;display:grid;place-items:center;color:#fff;font-size:17px}
+    .ico-blue{background:linear-gradient(135deg,#2f80ed,#5aa2ff)}
+    .ico-purple{background:linear-gradient(135deg,#7c66f2,#ad99ff)}
+    .ico-green{background:linear-gradient(135deg,#18a058,#62d68c)}
+    .ico-orange{background:linear-gradient(135deg,#f59e0b,#ffbf56)}
+    .section-body{padding:16px 18px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-field{margin-bottom:14px}
+    .form-field label{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#66748b;font-weight:900;margin-bottom:7px}
+    .form-field input,.form-field textarea,.form-field select{width:100%;border:1px solid #dce8f7;background:#fbfdff;border-radius:12px;padding:10px 12px;color:#384960;font-size:13px;line-height:1.6}
+    .form-field textarea{resize:vertical;min-height:86px}
+    .hint{font-size:11px;color:#9aa7b8;font-weight:800}
+    .template-table{border:1px solid #e0eafa;border-radius:16px;overflow:hidden;background:#fff}
+    .template-row{display:grid;grid-template-columns:48px 1.1fr 1.8fr 90px 90px 90px;min-height:46px;border-bottom:1px solid #edf2f8;align-items:center;font-size:12px;color:#526176}
+    .template-row:last-child{border-bottom:0}
+    .template-row.head{background:#f8fbff;font-weight:900;color:#26364e}
+    .template-row div{padding:10px;border-right:1px solid #edf2f8}.template-row div:last-child{border-right:0}
+    .pill{height:22px;border-radius:999px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+    .pill.blue{background:#eef6ff;color:#2f80ed}.pill.green{background:#eaf8ef;color:#16864d}.pill.orange{background:#fff5e6;color:#b37400}.pill.gray{background:#f3f5f8;color:#7d8aa0}.pill.purple{background:#f3f0ff;color:#7c66f2}.pill.red{background:#fff0f0;color:#d74747}
+
+    .code-box{background:#10182f;color:#dce8ff;border-radius:16px;padding:14px;border:1px solid #263754;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:12px;line-height:1.7;white-space:pre;overflow:auto;max-height:280px}.code-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.code-title b{font-size:13px}.code-title button{height:28px;border-radius:9px;background:#243556;color:#dce8ff;padding:0 10px;font-size:12px;font-weight:900}
+    .schema-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.schema-card{border:1px solid #e0eafa;border-radius:18px;background:#fbfdff;padding:14px}.schema-card h4{margin:0 0 10px;font-size:14px}.schema-card p{margin:0;color:#647086;font-size:12px;line-height:1.65}
+
+    .path-list{display:flex;flex-direction:column;gap:12px}.path-item{display:grid;grid-template-columns:154px 1fr auto;align-items:center;gap:10px;border:1px solid #e0eafa;border-radius:14px;background:#fbfdff;padding:10px}.path-item b{font-size:13px}.path-item input{height:36px;border:1px solid #dce8f7;border-radius:10px;padding:0 10px;background:#fff;color:#526176}.path-item button{height:34px;border-radius:10px;background:#fff;border:1px solid #d7e3f4;color:#506077;font-weight:900;padding:0 12px}
+    .backup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}.backup-card{border:1px solid #e0eafa;border-radius:16px;background:#fff;padding:13px}.backup-card span{font-size:12px;color:#7d8aa0;display:block;margin-bottom:6px}.backup-card b{font-size:20px}
+
+    .detail-panel{background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;min-height:0;display:flex;flex-direction:column}.detail-cover{height:126px;background:linear-gradient(135deg,#eef6ff,#f6f1ff);position:relative;padding:18px}.detail-cover:before{content:"Settings";position:absolute;right:16px;top:22px;font-size:42px;font-weight:900;color:rgba(47,128,237,.10)}.detail-cover h3{margin:0 0 8px;font-size:20px}.detail-cover p{margin:0;color:#65728a;font-size:13px;line-height:1.55;max-width:270px}.detail-body{padding:14px;overflow:auto}.detail-section{border:1px solid #e1eafa;border-radius:16px;background:#fff;margin-bottom:12px;overflow:hidden}.detail-section h4{height:40px;margin:0;padding:0 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #edf2f8;font-size:13px}.detail-section .section-content{padding:12px 13px;color:#4e5e75;font-size:12px;line-height:1.7}.check{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;margin-bottom:8px}.check:last-child{margin-bottom:0}.check i{width:16px;height:16px;border-radius:5px;background:#18a058;position:relative;margin-top:2px}.check i:after{content:"✓";position:absolute;color:#fff;font-size:11px;left:3px;top:-1px}.warning-card{background:#fff8eb;border:1px solid #f5d99f;color:#835b00;border-radius:14px;padding:12px;font-size:12px;line-height:1.6}.mini-run{border-radius:12px;background:#f8fbff;border:1px solid #e3edf9;padding:10px;margin-bottom:8px}.mini-run b{display:block;font-size:12px;margin-bottom:4px}.mini-run span{font-size:11px;color:#7e8a9e}.switch-row{height:42px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #edf2f8}.switch-row:last-child{border-bottom:0}.switch-row span{font-size:12px}.switch{width:42px;height:24px;border-radius:999px;background:#d7e2f0;position:relative}.switch:before{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;left:3px;top:3px;box-shadow:0 2px 6px rgba(0,0,0,.15)}.switch.on{background:#2f80ed}.switch.on:before{left:21px}
+
+    @media(max-width:1480px){.topbar{padding:0 24px;grid-template-columns:250px 1fr 390px}.nav{gap:34px}.main{padding:18px 22px 16px}.content{grid-template-columns:270px minmax(0,1fr) 330px}.hero{grid-template-columns:minmax(0,1fr) 470px}.template-row{grid-template-columns:42px 1fr 1.4fr 76px 76px 76px}.backup-grid{grid-template-columns:1fr}.schema-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-logo"></div>任务方法沉淀平台</div>
+    <nav class="nav"><a href="#">首页</a><a href="#">任务区</a><a href="#">Skill 库</a><a class="active" href="#">设置</a></nav>
+    <div class="top-right">
+      <div class="search"><span>⌕</span><input placeholder="搜索设置、模板、路径..." /></div>
+      <button class="icon-btn">♢<span class="badge-dot">2</span></button>
+      <div class="user"><div class="avatar">U</div><span>用户名</span><span>⌄</span></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="main-inner">
+      <section class="hero">
+        <div>
+          <h1>设置：定义模板、AI 回传规则和本地保存路径</h1>
+          <p>这里是平台的规则中枢。通过固定模板约束 AI 输出，管理本地数据路径和备份策略，保证不同模型也能按统一结构回写平台。</p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost-btn">导入配置</button>
+          <button class="outline-btn">导出配置</button>
+          <button class="primary-btn">保存全部设置</button>
+        </div>
+      </section>
+
+      <section class="content">
+        <aside class="panel">
+          <div class="panel-head"><h3>设置导航</h3><button class="soft-btn" style="height:32px;padding:0 10px;font-size:12px">重置</button></div>
+          <div class="panel-body">
+            <div class="status-card">
+              <b>系统状态</b>
+              <div class="status-row"><span class="status-dot">模板规则</span><span>已启用</span></div>
+              <div class="status-row"><span class="status-dot">本地备份</span><span>正常</span></div>
+              <div class="status-row"><span class="status-dot">AI 回传校验</span><span>开启</span></div>
+            </div>
+
+            <div class="nav-block">
+              <p class="nav-title">模板规则</p>
+              <div class="setting-nav-item active" data-target="report"><span>当前任务报告模板</span><small>6章</small></div>
+              <div class="setting-nav-item" data-target="organize"><span>当前整理模板</span><small>5项</small></div>
+              <div class="setting-nav-item" data-target="skill"><span>Skill 生成模板</span><small>12项</small></div>
+              <div class="setting-nav-item" data-target="flow"><span>流程图生成模板</span><small>节点</small></div>
+            </div>
+
+            <div class="nav-block">
+              <p class="nav-title">AI 接入</p>
+              <div class="setting-nav-item" data-target="input"><span>本地 AI 输入模板</span><small>JSON</small></div>
+              <div class="setting-nav-item" data-target="output"><span>本地 AI 回传模板</span><small>校验</small></div>
+            </div>
+
+            <div class="nav-block">
+              <p class="nav-title">本地数据</p>
+              <div class="setting-nav-item" data-target="path"><span>备份与保存路径</span><small>本地</small></div>
+              <div class="setting-nav-item" data-target="export"><span>数据导入导出</span><small>归档</small></div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="settings-main">
+          <div class="section-toolbar">
+            <div class="local-search"><span>⌕</span><input placeholder="搜索模板字段、JSON 规则、保存路径..." /></div>
+            <div class="toolbar-actions">
+              <button class="outline-btn">预览 JSON</button>
+              <button class="soft-btn">校验规则</button>
+              <button class="primary-btn">保存设置</button>
+            </div>
+          </div>
+
+          <div class="settings-scroll">
+            <section class="setting-section" id="report">
+              <div class="section-head"><h2><span class="ico-blue">▣</span>当前任务报告模板</h2><span class="pill blue">默认启用</span></div>
+              <div class="section-body">
+                <div class="form-grid">
+                  <div class="form-field"><label>模板名称 <span class="hint">用于任务报告生成</span></label><input value="默认当前任务报告模板" /></div>
+                  <div class="form-field"><label>模板版本 <span class="hint">生成报告时记录版本</span></label><input value="v1.0.0" /></div>
+                </div>
+                <div class="form-field"><label>AI 输出总规则 <span class="hint">不同模型都必须遵守</span></label><textarea>请严格按照当前任务报告模板输出，不得新增章节，不得省略必填章节，不得改变字段名称。若信息不足，请在对应章节中说明“待补充”，不要自行编造。</textarea></div>
+                <div class="template-table">
+                  <div class="template-row head"><div>序号</div><div>章节名称</div><div>字段说明</div><div>必填</div><div>字数</div><div>格式</div></div>
+                  <div class="template-row"><div>一</div><div>任务概述</div><div>说明当前任务要解决什么问题，以及任务最终目标。</div><div><span class="pill green">必填</span></div><div>100-200</div><div>段落</div></div>
+                  <div class="template-row"><div>二</div><div>上下文依据</div><div>提取任务目标、背景资料、约束条件、判断标准。</div><div><span class="pill green">必填</span></div><div>150-300</div><div>列表</div></div>
+                  <div class="template-row"><div>三</div><div>HTML 成果说明</div><div>总结已保存 HTML 成果的用途、价值和是否纳入报告。</div><div><span class="pill green">必填</span></div><div>100-250</div><div>列表</div></div>
+                  <div class="template-row"><div>四</div><div>当前结论</div><div>明确本轮任务形成的关键判断和方案方向。</div><div><span class="pill green">必填</span></div><div>100-200</div><div>段落</div></div>
+                  <div class="template-row"><div>五</div><div>风险边界</div><div>说明不做什么、不能误解什么，以及 AI 输出限制。</div><div><span class="pill green">必填</span></div><div>80-180</div><div>列表</div></div>
+                  <div class="template-row"><div>六</div><div>后续行动与流程图建议</div><div>输出行动项和可生成流程图的节点结构。</div><div><span class="pill green">必填</span></div><div>150-300</div><div>数组</div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="organize">
+              <div class="section-head"><h2><span class="ico-purple">◇</span>当前整理模板</h2><span class="pill purple">右侧面板字段</span></div>
+              <div class="section-body">
+                <div class="schema-grid">
+                  <div class="schema-card"><h4>字段用途</h4><p>当前整理用于任务区右侧面板，承接 AI 回写结果，并允许用户人工确认。它不是自由笔记，而是报告生成和流程图生成的结构化中间层。</p></div>
+                  <div class="schema-card"><h4>覆盖规则</h4><p>AI 可以建议填写内容，但不能直接覆盖用户已锁定字段。关键结论、行动项和流程图节点需要人工确认后保存。</p></div>
+                </div>
+                <div class="template-table" style="margin-top:14px">
+                  <div class="template-row head"><div>序号</div><div>字段名称</div><div>字段说明</div><div>必填</div><div>类型</div><div>AI覆盖</div></div>
+                  <div class="template-row"><div>①</div><div>当前结论</div><div>本任务当前最重要的判断和方向。</div><div><span class="pill green">必填</span></div><div>文本</div><div><span class="pill orange">需确认</span></div></div>
+                  <div class="template-row"><div>②</div><div>关键依据</div><div>支撑当前结论的材料、上下文和 HTML 成果。</div><div><span class="pill green">必填</span></div><div>文本</div><div><span class="pill orange">需确认</span></div></div>
+                  <div class="template-row"><div>③</div><div>待确认问题</div><div>任务继续推进前需要用户判断的问题。</div><div><span class="pill gray">选填</span></div><div>数组</div><div><span class="pill blue">允许</span></div></div>
+                  <div class="template-row"><div>④</div><div>行动项</div><div>下一步可执行动作。</div><div><span class="pill green">必填</span></div><div>数组</div><div><span class="pill orange">需确认</span></div></div>
+                  <div class="template-row"><div>⑤</div><div>流程图节点</div><div>可用于生成流程图的节点标题和说明。</div><div><span class="pill green">必填</span></div><div>数组</div><div><span class="pill orange">需确认</span></div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="skill">
+              <div class="section-head"><h2><span class="ico-green">✦</span>Skill 生成模板</h2><span class="pill green">方法沉淀核心</span></div>
+              <div class="section-body">
+                <div class="form-field"><label>Skill 生成规则 <span class="hint">从任务中提炼方法，不沉淀基础知识</span></label><textarea>请从当前任务中提炼可复用的任务方法，而不是记录快捷键、语法或工具按钮。Skill 必须体现任务完成思路、执行步骤、AI 分工、人工确认点、判断标准和输出物。</textarea></div>
+                <div class="template-table">
+                  <div class="template-row head"><div>#</div><div>字段名称</div><div>说明</div><div>必填</div><div>类型</div><div>版本</div></div>
+                  <div class="template-row"><div>1</div><div>Skill 名称</div><div>明确这套方法解决什么任务。</div><div><span class="pill green">必填</span></div><div>文本</div><div>记录</div></div>
+                  <div class="template-row"><div>2</div><div>适用场景</div><div>什么情况下使用此 Skill。</div><div><span class="pill green">必填</span></div><div>文本</div><div>记录</div></div>
+                  <div class="template-row"><div>3</div><div>输入材料</div><div>执行前需要准备什么材料。</div><div><span class="pill green">必填</span></div><div>数组</div><div>记录</div></div>
+                  <div class="template-row"><div>4</div><div>执行流程</div><div>按顺序描述任务如何完成。</div><div><span class="pill green">必填</span></div><div>数组</div><div>记录</div></div>
+                  <div class="template-row"><div>5</div><div>AI 分工</div><div>AI 在哪些步骤参与，输出什么。</div><div><span class="pill green">必填</span></div><div>数组</div><div>记录</div></div>
+                  <div class="template-row"><div>6</div><div>用户确认点</div><div>哪些地方必须人工判断。</div><div><span class="pill green">必填</span></div><div>数组</div><div>记录</div></div>
+                  <div class="template-row"><div>7</div><div>判断标准</div><div>什么结果算合格。</div><div><span class="pill green">必填</span></div><div>数组</div><div>记录</div></div>
+                  <div class="template-row"><div>8</div><div>输出物</div><div>最终产出哪些内容。</div><div><span class="pill green">必填</span></div><div>数组</div><div>记录</div></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="flow">
+              <div class="section-head"><h2><span class="ico-orange">⌁</span>流程图生成模板</h2><span class="pill orange">节点结构</span></div>
+              <div class="section-body">
+                <div class="schema-grid">
+                  <div class="schema-card"><h4>节点字段</h4><p>每个节点必须包含 id、title、description、type、position_x、position_y、sort_order。</p></div>
+                  <div class="schema-card"><h4>连线字段</h4><p>每条连线必须包含 source_node_id、target_node_id、label。后续可扩展样式配置。</p></div>
+                </div>
+                <div class="form-field" style="margin-top:14px"><label>流程图生成提示词</label><textarea>请基于当前任务报告第六章和当前整理中的流程图节点字段，生成流程图节点与连线。节点标题要短，节点说明要说明该步骤的输入、动作和输出。</textarea></div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="input">
+              <div class="section-head"><h2><span class="ico-blue">{}</span>本地 AI 输入模板</h2><span class="pill blue">发送给 AI</span></div>
+              <div class="section-body">
+                <div class="code-title"><b>输入 JSON 结构</b><button>复制模板</button></div>
+                <div class="code-box">{
+  "task_context": {
+    "goal": "",
+    "background": "",
+    "constraints": "",
+    "criteria": ""
+  },
+  "html_assets": [
+    {
+      "name": "",
+      "description": "",
+      "html_summary": "",
+      "include_in_report": true
+    }
+  ],
+  "current_organize": {
+    "conclusion": "",
+    "basis": "",
+    "pending_questions": [],
+    "action_items": [],
+    "flowchart_nodes": []
+  },
+  "template_id": "default_task_report_v1"
+}</div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="output">
+              <div class="section-head"><h2><span class="ico-purple">↩</span>本地 AI 回传模板</h2><span class="pill purple">平台校验</span></div>
+              <div class="section-body">
+                <div class="form-field"><label>校验失败提示文案</label><input value="AI 返回结果不符合当前模板，请重新生成或手动修正。" /></div>
+                <div class="code-title"><b>回传 JSON 结构</b><button>复制模板</button></div>
+                <div class="code-box">{
+  "task_report": {
+    "overview": "",
+    "context_basis": "",
+    "html_assets_summary": "",
+    "current_conclusion": "",
+    "risk_boundary": "",
+    "next_actions_and_flowchart": ""
+  },
+  "organize_panel": {
+    "current_conclusion": "",
+    "key_basis": "",
+    "pending_questions": [],
+    "action_items": [],
+    "flowchart_nodes": []
+  },
+  "flowchart": {
+    "nodes": [],
+    "edges": []
+  },
+  "skill_draft": {
+    "name": "",
+    "scenario": "",
+    "inputs": [],
+    "steps": [],
+    "ai_roles": [],
+    "user_checkpoints": [],
+    "quality_criteria": [],
+    "outputs": []
+  }
+}</div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="path">
+              <div class="section-head"><h2><span class="ico-green">▤</span>备份与保存路径</h2><span class="pill green">本地优先</span></div>
+              <div class="section-body">
+                <div class="path-list">
+                  <div class="path-item"><b>SQLite 数据库</b><input value="D:/TaskSkillPlatform/data/app.db" /><button>选择</button></div>
+                  <div class="path-item"><b>HTML 成果目录</b><input value="D:/TaskSkillPlatform/html_assets/" /><button>选择</button></div>
+                  <div class="path-item"><b>导出文件目录</b><input value="D:/TaskSkillPlatform/exports/" /><button>选择</button></div>
+                  <div class="path-item"><b>自动备份目录</b><input value="D:/TaskSkillPlatform/backups/" /><button>选择</button></div>
+                </div>
+                <div class="backup-grid">
+                  <div class="backup-card"><span>最近一次备份</span><b>今天 18:42</b></div>
+                  <div class="backup-card"><span>保留备份数量</span><b>15 份</b></div>
+                  <div class="backup-card"><span>备份状态</span><b>正常</b></div>
+                </div>
+              </div>
+            </section>
+
+            <section class="setting-section" id="export" style="margin-bottom:0">
+              <div class="section-head"><h2><span class="ico-orange">⇅</span>数据导入导出</h2><span class="pill orange">归档恢复</span></div>
+              <div class="section-body">
+                <div class="schema-grid">
+                  <div class="schema-card"><h4>导出内容</h4><p>支持导出任务包、HTML 成果、当前任务报告、Skill、流程图和模板设置。</p></div>
+                  <div class="schema-card"><h4>恢复策略</h4><p>恢复前自动生成当前数据快照，避免误覆盖。本地恢复后需重新校验模板版本。</p></div>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:14px"><button class="outline-btn">导入备份</button><button class="outline-btn">导出全部数据</button><button class="primary-btn">立即备份</button></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <aside class="detail-panel">
+          <div class="detail-cover">
+            <h3>设置说明</h3>
+            <p>模板是平台稳定性的核心。先定义规则，再让 AI 按规则生成内容。</p>
+          </div>
+          <div class="detail-body">
+            <section class="detail-section">
+              <h4>关键原则 <span class="pill blue">必须遵守</span></h4>
+              <div class="section-content">
+                <div class="check"><i></i><span>AI 输出必须匹配模板字段，不能自由新增结构。</span></div>
+                <div class="check"><i></i><span>任务报告、当前整理、Skill 草稿必须记录模板版本。</span></div>
+                <div class="check"><i></i><span>备份路径和数据库路径必须可见、可修改、可恢复。</span></div>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h4>开关控制</h4>
+              <div class="section-content">
+                <div class="switch-row"><span>启用模板校验</span><div class="switch on"></div></div>
+                <div class="switch-row"><span>生成前自动备份</span><div class="switch on"></div></div>
+                <div class="switch-row"><span>允许 AI 覆盖已确认字段</span><div class="switch"></div></div>
+                <div class="switch-row"><span>保留报告生成记录</span><div class="switch on"></div></div>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h4>当前风险</h4>
+              <div class="section-content"><div class="warning-card">如果模板规则定义不清，AI 会因为模型不同而输出不同结构，导致报告、流程图和 Skill 无法稳定回写。</div></div>
+            </section>
+
+            <section class="detail-section">
+              <h4>最近配置变更</h4>
+              <div class="section-content">
+                <div class="mini-run"><b>更新当前任务报告模板</b><span>今天 18:40 · 新增“风险边界”章节</span></div>
+                <div class="mini-run"><b>启用回传结构校验</b><span>今天 18:22 · 校验 task_report / flowchart / skill_draft</span></div>
+                <div class="mini-run"><b>修改 HTML 成果保存路径</b><span>昨天 21:16 · 迁移到本地备份目录</span></div>
+              </div>
+            </section>
+
+            <section class="detail-section" style="margin-bottom:0">
+              <h4>推荐下一步</h4>
+              <div class="section-content">
+                <ol style="margin:0;padding-left:18px">
+                  <li>先锁定当前任务报告模板。</li>
+                  <li>再配置 AI 输入与回传 JSON。</li>
+                  <li>最后配置备份路径和自动备份规则。</li>
+                </ol>
+              </div>
+            </section>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+  const navItems = document.querySelectorAll('.setting-nav-item');
+  navItems.forEach(item=>{
+    item.addEventListener('click',()=>{
+      navItems.forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      const target = document.getElementById(item.dataset.target);
+      if(target){ target.scrollIntoView({behavior:'smooth',block:'start'}); }
+    });
+  });
+</script>
+</body>
+</html>

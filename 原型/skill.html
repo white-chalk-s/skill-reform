@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>任务方法沉淀平台 - Skill 库原型</title>
+  <style>
+    :root{
+      --nav:#10182f;
+      --nav2:#15203d;
+      --bg:#eef5ff;
+      --card:#ffffff;
+      --text:#172033;
+      --sub:#647086;
+      --weak:#9aa7b8;
+      --line:#dce8f7;
+      --line2:#c8daf1;
+      --blue:#2f80ed;
+      --blue2:#5aa2ff;
+      --blueSoft:#eef6ff;
+      --green:#18a058;
+      --greenSoft:#eaf8ef;
+      --orange:#f59e0b;
+      --orangeSoft:#fff5e6;
+      --purple:#7c66f2;
+      --purpleSoft:#f3f0ff;
+      --red:#ef5b5b;
+      --pink:#e85aa7;
+      --pinkSoft:#fff0f8;
+      --shadow:0 18px 46px rgba(31,67,120,.12);
+      --shadow2:0 10px 24px rgba(31,67,120,.08);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(145deg,#eaf2ff 0%,#f8fbff 45%,#eef6ff 100%);color:var(--text)}
+    body{overflow:hidden}
+    button,input,textarea{font-family:inherit}button{border:0;cursor:pointer}input,textarea{outline:none}
+    .app{height:100vh;min-width:1320px;display:flex;flex-direction:column;overflow:hidden}
+
+    .topbar{height:66px;background:linear-gradient(180deg,var(--nav),var(--nav2));color:#fff;display:grid;grid-template-columns:280px 1fr 430px;align-items:center;padding:0 34px;box-shadow:0 10px 30px rgba(7,16,38,.22);z-index:20;flex-shrink:0}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;font-size:20px;letter-spacing:.2px}.brand-logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#5aa2ff,#8c76ff);display:grid;place-items:center;box-shadow:0 10px 20px rgba(47,128,237,.32)}.brand-logo:before{content:"◆";font-size:15px;color:#fff;transform:rotate(45deg)}
+    .nav{display:flex;justify-content:center;gap:52px;height:66px}.nav a{position:relative;height:66px;display:flex;align-items:center;color:#cfd8ef;text-decoration:none;font-weight:800}.nav a.active{color:#fff}.nav a.active:after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:34px;height:4px;border-radius:4px 4px 0 0;background:var(--blue2);box-shadow:0 0 16px rgba(90,162,255,.65)}
+    .top-right{display:flex;align-items:center;justify-content:flex-end;gap:14px}.search{height:38px;width:250px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);display:flex;align-items:center;padding:0 12px;gap:8px}.search input{flex:1;border:0;background:transparent;color:#fff;font-size:13px}.search input::placeholder{color:#9aa7c8}.icon-btn{position:relative;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;display:grid;place-items:center;font-size:16px}.badge-dot{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;border-radius:99px;background:var(--red);font-size:11px;font-weight:900;display:grid;place-items:center;border:2px solid var(--nav)}.user{display:flex;align-items:center;gap:9px;color:#eaf1ff;font-weight:800}.avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d9e9ff,#7eaef7);display:grid;place-items:center;color:#17315a;font-weight:900;border:2px solid rgba(255,255,255,.35)}
+
+    .main{position:relative;flex:1;padding:22px 28px 18px;overflow:hidden}.main:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 4%,rgba(47,128,237,.13),transparent 30%),radial-gradient(circle at 92% 8%,rgba(124,102,242,.11),transparent 34%);pointer-events:none}.main-inner{position:relative;z-index:1;height:100%;max-width:1560px;margin:0 auto;display:grid;grid-template-rows:auto 1fr;gap:14px}
+
+    .hero{background:rgba(255,255,255,.9);border:1px solid rgba(207,222,246,.96);border-radius:24px;box-shadow:var(--shadow);padding:20px 22px;display:grid;grid-template-columns:minmax(0,1fr) 520px;gap:18px;align-items:center}.hero h1{margin:0 0 8px;font-size:24px;font-weight:900}.hero p{margin:0;color:var(--sub);font-size:14px;line-height:1.65}.hero-actions{display:flex;justify-content:flex-end;align-items:center;gap:10px}.primary-btn,.outline-btn,.soft-btn{height:40px;border-radius:12px;padding:0 16px;font-weight:900;font-size:14px}.primary-btn{background:linear-gradient(135deg,#2f80ed,#5aa2ff);color:#fff;box-shadow:0 14px 26px rgba(47,128,237,.25)}.outline-btn{background:#fff;border:1px solid #d6e3f4;color:#44546c}.soft-btn{background:#f2f7ff;border:1px solid #d7e6fb;color:#2f80ed}.ghost-btn{height:40px;border-radius:12px;padding:0 16px;background:#f6f8fc;color:#5a687e;border:1px solid #dce8f7;font-weight:900}
+
+    .content{display:grid;grid-template-columns:278px minmax(0,1fr) 360px;gap:14px;min-height:0}.panel{background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;min-height:0;display:flex;flex-direction:column}.panel-head{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #e6eef8;flex-shrink:0}.panel-head h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}.panel-head h3:before{content:"";width:4px;height:16px;border-radius:4px;background:var(--blue)}.panel-body{padding:14px;overflow:auto;min-height:0}.panel-body::-webkit-scrollbar,.skill-grid::-webkit-scrollbar,.detail-body::-webkit-scrollbar{width:8px;height:8px}.panel-body::-webkit-scrollbar-thumb,.skill-grid::-webkit-scrollbar-thumb,.detail-body::-webkit-scrollbar-thumb{background:#cbd8e8;border-radius:10px}
+
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.stat{height:80px;border-radius:16px;background:linear-gradient(180deg,#fff,#f7fbff);border:1px solid #e1eafa;padding:12px;display:flex;flex-direction:column;justify-content:center}.stat span{font-size:12px;color:var(--sub)}.stat b{font-size:24px;margin-top:5px}.filter-group{margin-bottom:14px}.filter-title{font-size:12px;color:#6b7890;font-weight:900;margin:0 0 8px}.filter-item{height:38px;border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:0 11px;margin-bottom:7px;color:#4e5e75;background:#fff;border:1px solid #e4edf8;font-size:13px;font-weight:800}.filter-item.active{background:#eef6ff;border-color:#b9d5fb;color:#2f80ed}.filter-item small{color:#97a5b9;font-weight:900}.template-card{border-radius:16px;background:#fff8eb;border:1px solid #f5d99f;padding:12px;color:#835b00}.template-card b{display:block;font-size:13px;margin-bottom:6px}.template-card p{margin:0;font-size:12px;line-height:1.6}
+
+    .library{display:flex;flex-direction:column;min-height:0}.library-toolbar{height:62px;background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:22px;box-shadow:var(--shadow2);padding:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin-bottom:14px}.local-search{height:42px;border-radius:13px;background:#fff;border:1px solid #dce8f7;display:flex;align-items:center;gap:9px;padding:0 12px;color:#8a97ab}.local-search input{flex:1;border:0;background:transparent;font-size:13px;color:#26364e}.lib-tabs{height:42px;border-radius:13px;background:#f5f8fd;border:1px solid #dce8f7;padding:4px;display:flex;gap:4px}.lib-tabs button{height:32px;border-radius:9px;background:transparent;color:#647086;padding:0 12px;font-weight:900}.lib-tabs button.active{background:#fff;color:#2f80ed;border:1px solid #d8e8fb;box-shadow:0 8px 18px rgba(37,86,156,.08)}
+    .skill-grid{overflow:auto;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:2px 4px 8px}.skill-card{background:#fff;border:1px solid #e0eafa;border-radius:22px;box-shadow:var(--shadow2);overflow:hidden;transition:.18s}.skill-card:hover{transform:translateY(-2px);border-color:#bdd7fb}.skill-card.active{border-color:#86bdfd;box-shadow:0 16px 34px rgba(47,128,237,.15)}.skill-card-head{padding:16px 16px 12px;display:grid;grid-template-columns:46px 1fr auto;gap:12px;align-items:start}.skill-icon{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;color:#fff;font-size:20px;font-weight:900}.skill-icon.blue{background:linear-gradient(135deg,#2f80ed,#5aa2ff)}.skill-icon.purple{background:linear-gradient(135deg,#7c66f2,#ad99ff)}.skill-icon.green{background:linear-gradient(135deg,#18a058,#62d68c)}.skill-icon.orange{background:linear-gradient(135deg,#f59e0b,#ffbf56)}.skill-icon.pink{background:linear-gradient(135deg,#e85aa7,#ff93cd)}.skill-title{min-width:0}.skill-title b{font-size:15px;display:block;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.skill-title span{display:block;color:#728096;font-size:12px;line-height:1.5}.version{height:24px;border-radius:999px;background:#f5f7fb;color:#7d8aa0;border:1px solid #e2e9f4;padding:0 8px;font-size:11px;font-weight:900;display:flex;align-items:center}.skill-card-body{padding:0 16px 14px}.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.tag{height:23px;border-radius:999px;padding:0 8px;display:inline-flex;align-items:center;font-size:11px;font-weight:900}.tag.blue{background:#eef6ff;color:#2f80ed}.tag.green{background:#eaf8ef;color:#16864d}.tag.orange{background:#fff5e6;color:#b37400}.tag.purple{background:#f3f0ff;color:#7c66f2}.tag.gray{background:#f3f5f8;color:#7d8aa0}.tag.pink{background:#fff0f8;color:#d74791}.skill-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border-top:1px solid #edf2f8;padding-top:12px}.meta-box{border-radius:12px;background:#f8fbff;border:1px solid #e6eef8;padding:9px}.meta-box span{display:block;color:#8b98aa;font-size:11px;margin-bottom:4px}.meta-box b{font-size:13px}.skill-actions{display:flex;gap:8px;margin-top:12px}.skill-actions button{height:34px;border-radius:10px;font-size:12px;font-weight:900}.skill-actions .use{background:#2f80ed;color:#fff;flex:1}.skill-actions .edit{background:#fff;border:1px solid #d7e3f4;color:#506077;width:76px}
+
+    .detail{background:rgba(255,255,255,.92);border:1px solid rgba(207,222,246,.96);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;min-height:0;display:flex;flex-direction:column}.detail-cover{height:126px;background:linear-gradient(135deg,#eef6ff,#f6f1ff);position:relative;padding:18px}.detail-cover:before{content:"Skill";position:absolute;right:20px;top:20px;font-size:46px;font-weight:900;color:rgba(47,128,237,.10)}.detail-cover h3{margin:0 0 8px;font-size:20px}.detail-cover p{margin:0;color:#65728a;font-size:13px;line-height:1.55;max-width:260px}.detail-actions{position:absolute;left:18px;bottom:16px;display:flex;gap:8px}.detail-actions button{height:32px;border-radius:10px;font-size:12px;font-weight:900;padding:0 10px}.detail-body{padding:14px;overflow:auto;min-height:0}.detail-section{border:1px solid #e1eafa;border-radius:16px;background:#fff;margin-bottom:12px;overflow:hidden}.detail-section h4{height:40px;margin:0;padding:0 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #edf2f8;font-size:13px}.detail-section .section-content{padding:12px 13px;color:#4e5e75;font-size:12px;line-height:1.7}.detail-section ul,.detail-section ol{margin:0;padding-left:18px}.check{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start;margin-bottom:8px}.check:last-child{margin-bottom:0}.check i{width:16px;height:16px;border-radius:5px;background:#18a058;position:relative;margin-top:2px}.check i:after{content:"✓";position:absolute;color:#fff;font-size:11px;left:3px;top:-1px}.run-list{display:flex;flex-direction:column;gap:8px}.run{border-radius:12px;background:#f8fbff;border:1px solid #e3edf9;padding:10px}.run b{display:block;font-size:12px;margin-bottom:4px}.run span{font-size:11px;color:#7e8a9e}.prompt-box{border-radius:12px;background:#10182f;color:#dce8ff;padding:12px;font-size:11px;line-height:1.7;white-space:pre-wrap;max-height:150px;overflow:auto}.flow-mini{height:130px;border-radius:14px;background:linear-gradient(135deg,#f8fbff,#eef6ff);border:1px dashed #b8d3f5;position:relative;overflow:hidden}.flow-node{position:absolute;height:30px;border-radius:10px;background:#fff;border:1px solid #d7e6fb;padding:0 9px;font-size:11px;font-weight:900;display:flex;align-items:center;color:#36506f}.flow-node.n1{left:12px;top:28px}.flow-node.n2{left:120px;top:28px}.flow-node.n3{left:228px;top:28px}.flow-node.n4{left:120px;top:82px}.flow-line{position:absolute;height:2px;background:#89b5ef}.flow-line.l1{left:92px;top:43px;width:28px}.flow-line.l2{left:200px;top:43px;width:28px}.flow-line.l3{left:160px;top:58px;width:2px;height:24px}
+
+    @media(max-width:1480px){.topbar{padding:0 24px;grid-template-columns:250px 1fr 390px}.nav{gap:34px}.main{padding:18px 22px 16px}.content{grid-template-columns:260px minmax(0,1fr) 330px}.skill-grid{grid-template-columns:1fr}.hero{grid-template-columns:minmax(0,1fr) 480px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><div class="brand-logo"></div>任务方法沉淀平台</div>
+    <nav class="nav"><a href="#">首页</a><a href="#">任务区</a><a class="active" href="#">Skill 库</a><a href="#">设置</a></nav>
+    <div class="top-right">
+      <div class="search"><span>⌕</span><input placeholder="搜索任务、Skill、报告..." /></div>
+      <button class="icon-btn">♢<span class="badge-dot">5</span></button>
+      <div class="user"><div class="avatar">U</div><span>用户名</span><span>⌄</span></div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="main-inner">
+      <section class="hero">
+        <div>
+          <h1>Skill 库：把任务方法沉淀成可复用流程</h1>
+          <p>这里管理已经沉淀的方法流程。每个 Skill 都包含适用场景、输入材料、执行步骤、AI 分工、人工确认点和输出标准。</p>
+        </div>
+        <div class="hero-actions">
+          <button class="ghost-btn">导入 Skill</button>
+          <button class="outline-btn">从任务生成 Skill</button>
+          <button class="primary-btn">＋ 新建 Skill</button>
+        </div>
+      </section>
+
+      <section class="content">
+        <aside class="panel">
+          <div class="panel-head"><h3>筛选与概览</h3><button class="soft-btn" style="height:32px;padding:0 10px;font-size:12px">重置</button></div>
+          <div class="panel-body">
+            <div class="stat-grid">
+              <div class="stat"><span>已沉淀 Skill</span><b>14</b></div>
+              <div class="stat"><span>本周调用</span><b>36</b></div>
+              <div class="stat"><span>草稿</span><b>4</b></div>
+              <div class="stat"><span>待优化</span><b>3</b></div>
+            </div>
+
+            <div class="filter-group">
+              <p class="filter-title">分类</p>
+              <div class="filter-item active"><span>全部 Skill</span><small>14</small></div>
+              <div class="filter-item"><span>原型设计</span><small>4</small></div>
+              <div class="filter-item"><span>需求分析</span><small>3</small></div>
+              <div class="filter-item"><span>报告生成</span><small>3</small></div>
+              <div class="filter-item"><span>流程梳理</span><small>2</small></div>
+              <div class="filter-item"><span>竞品分析</span><small>2</small></div>
+            </div>
+
+            <div class="filter-group">
+              <p class="filter-title">状态</p>
+              <div class="filter-item active"><span>已发布</span><small>10</small></div>
+              <div class="filter-item"><span>草稿</span><small>4</small></div>
+              <div class="filter-item"><span>待复盘</span><small>3</small></div>
+            </div>
+
+            <div class="template-card">
+              <b>Skill 模板规则</b>
+              <p>Skill 必须包含：适用场景、输入材料、执行流程、AI 分工、用户确认点、判断标准、输出物和复用提示词。</p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="library">
+          <div class="library-toolbar">
+            <div class="local-search"><span>⌕</span><input placeholder="搜索 Skill 名称、场景、输出物..." /></div>
+            <div class="lib-tabs"><button class="active">全部</button><button>最近使用</button><button>草稿</button><button>待优化</button></div>
+          </div>
+
+          <div class="skill-grid">
+            <article class="skill-card active" data-skill="prototype">
+              <div class="skill-card-head">
+                <div class="skill-icon blue">⌘</div>
+                <div class="skill-title"><b>如何生成中高保真 HTML 原型</b><span>从需求文档、截图和参考页面出发，生成可预览、可迭代的 HTML 原型。</span></div>
+                <span class="version">v1.4</span>
+              </div>
+              <div class="skill-card-body">
+                <div class="tag-row"><span class="tag blue">原型设计</span><span class="tag purple">AI 生成 HTML</span><span class="tag green">已发布</span></div>
+                <div class="skill-meta"><div class="meta-box"><span>使用次数</span><b>12</b></div><div class="meta-box"><span>最近使用</span><b>今天</b></div><div class="meta-box"><span>关联任务</span><b>6</b></div></div>
+                <div class="skill-actions"><button class="use">使用此 Skill 创建任务</button><button class="edit">编辑</button></div>
+              </div>
+            </article>
+
+            <article class="skill-card" data-skill="requirement">
+              <div class="skill-card-head">
+                <div class="skill-icon purple">▤</div>
+                <div class="skill-title"><b>如何拆解需求文档</b><span>将混乱需求拆成目标、场景、模块、交互、限制和输出要求。</span></div>
+                <span class="version">v1.2</span>
+              </div>
+              <div class="skill-card-body">
+                <div class="tag-row"><span class="tag purple">需求分析</span><span class="tag blue">结构提取</span><span class="tag green">已发布</span></div>
+                <div class="skill-meta"><div class="meta-box"><span>使用次数</span><b>9</b></div><div class="meta-box"><span>最近使用</span><b>昨天</b></div><div class="meta-box"><span>关联任务</span><b>5</b></div></div>
+                <div class="skill-actions"><button class="use">使用此 Skill 创建任务</button><button class="edit">编辑</button></div>
+              </div>
+            </article>
+
+            <article class="skill-card" data-skill="report">
+              <div class="skill-card-head">
+                <div class="skill-icon orange">◫</div>
+                <div class="skill-title"><b>如何生成当前任务报告</b><span>基于任务上下文、HTML 成果和当前整理，按固定模板生成报告。</span></div>
+                <span class="version">v1.0</span>
+              </div>
+              <div class="skill-card-body">
+                <div class="tag-row"><span class="tag orange">报告生成</span><span class="tag blue">固定模板</span><span class="tag green">已发布</span></div>
+                <div class="skill-meta"><div class="meta-box"><span>使用次数</span><b>8</b></div><div class="meta-box"><span>最近使用</span><b>2天前</b></div><div class="meta-box"><span>关联任务</span><b>4</b></div></div>
+                <div class="skill-actions"><button class="use">使用此 Skill 创建任务</button><button class="edit">编辑</button></div>
+              </div>
+            </article>
+
+            <article class="skill-card" data-skill="flow">
+              <div class="skill-card-head">
+                <div class="skill-icon green">⌁</div>
+                <div class="skill-title"><b>如何梳理任务流程图</b><span>从报告、行动项和流程节点中生成可编辑的流程图结构。</span></div>
+                <span class="version">v0.9</span>
+              </div>
+              <div class="skill-card-body">
+                <div class="tag-row"><span class="tag green">流程梳理</span><span class="tag purple">流程图</span><span class="tag orange">待优化</span></div>
+                <div class="skill-meta"><div class="meta-box"><span>使用次数</span><b>7</b></div><div class="meta-box"><span>最近使用</span><b>3天前</b></div><div class="meta-box"><span>关联任务</span><b>3</b></div></div>
+                <div class="skill-actions"><button class="use">使用此 Skill 创建任务</button><button class="edit">编辑</button></div>
+              </div>
+            </article>
+
+            <article class="skill-card" data-skill="compete">
+              <div class="skill-card-head">
+                <div class="skill-icon pink">◆</div>
+                <div class="skill-title"><b>如何做竞品能力对比</b><span>统一对比维度、描述标准和输出格式，减少主观发挥。</span></div>
+                <span class="version">v0.8</span>
+              </div>
+              <div class="skill-card-body">
+                <div class="tag-row"><span class="tag pink">竞品分析</span><span class="tag blue">对比表格</span><span class="tag gray">草稿</span></div>
+                <div class="skill-meta"><div class="meta-box"><span>使用次数</span><b>5</b></div><div class="meta-box"><span>最近使用</span><b>上周</b></div><div class="meta-box"><span>关联任务</span><b>2</b></div></div>
+                <div class="skill-actions"><button class="use">使用此 Skill 创建任务</button><button class="edit">编辑</button></div>
+              </div>
+            </article>
+
+            <article class="skill-card" data-skill="review">
+              <div class="skill-card-head">
+                <div class="skill-icon purple">✓</div>
+                <div class="skill-title"><b>如何复盘一次任务过程</b><span>从结果、过程、判断、失误和可复用经验中提炼方法。</span></div>
+                <span class="version">v0.6</span>
+              </div>
+              <div class="skill-card-body">
+                <div class="tag-row"><span class="tag purple">复盘</span><span class="tag green">方法沉淀</span><span class="tag gray">草稿</span></div>
+                <div class="skill-meta"><div class="meta-box"><span>使用次数</span><b>3</b></div><div class="meta-box"><span>最近使用</span><b>上周</b></div><div class="meta-box"><span>关联任务</span><b>1</b></div></div>
+                <div class="skill-actions"><button class="use">使用此 Skill 创建任务</button><button class="edit">编辑</button></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <aside class="detail">
+          <div class="detail-cover">
+            <h3 id="detailTitle">如何生成中高保真 HTML 原型</h3>
+            <p id="detailDesc">把需求、截图和参考页面转化为可预览、可迭代的 HTML 原型。</p>
+            <div class="detail-actions"><button class="primary-btn">使用此 Skill</button><button class="outline-btn">编辑</button></div>
+          </div>
+          <div class="detail-body">
+            <section class="detail-section">
+              <h4>适用场景 <span class="tag blue">场景判断</span></h4>
+              <div class="section-content" id="scenarioText">当用户提供需求文档、页面截图、参考作品或口头描述，希望生成中高保真 HTML 原型时使用。</div>
+            </section>
+
+            <section class="detail-section">
+              <h4>输入材料</h4>
+              <div class="section-content">
+                <ul id="inputsList"><li>需求文档或需求描述</li><li>当前页面截图</li><li>参考页面或风格要求</li><li>用户对布局、交互、信息密度的偏好</li></ul>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h4>执行流程</h4>
+              <div class="section-content">
+                <ol id="stepsList"><li>阅读需求，提取页面目标</li><li>拆分页面模块和信息层级</li><li>确定布局结构和交互入口</li><li>生成 HTML 原型</li><li>检查视觉质量和概念清晰度</li><li>根据反馈迭代并沉淀版本</li></ol>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h4>AI 分工与人工确认</h4>
+              <div class="section-content">
+                <div class="check"><i></i><span>AI 负责提炼需求、生成结构、输出 HTML 和总结报告。</span></div>
+                <div class="check"><i></i><span>用户负责判断页面是否好看、功能是否真实、信息是否过密。</span></div>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h4>判断标准</h4>
+              <div class="section-content">
+                <ul><li>页面接近中高保真，不是粗糙线框</li><li>信息层级清楚，不堆功能</li><li>交互入口明确，能继续迭代开发</li><li>输出结果符合任务上下文和模板规则</li></ul>
+              </div>
+            </section>
+
+            <section class="detail-section">
+              <h4>复用提示词</h4>
+              <div class="section-content"><div class="prompt-box">请基于当前任务上下文、需求文档和参考截图，按照“页面目标 → 模块拆分 → 布局结构 → 交互说明 → HTML 原型 → 检查清单”的流程，生成中高保真 HTML 原型。不要输出粗糙线框图。</div></div>
+            </section>
+
+            <section class="detail-section">
+              <h4>流程图预览</h4>
+              <div class="section-content"><div class="flow-mini"><div class="flow-node n1">读需求</div><div class="flow-line l1"></div><div class="flow-node n2">拆模块</div><div class="flow-line l2"></div><div class="flow-node n3">出原型</div><div class="flow-line l3"></div><div class="flow-node n4">人工确认</div></div></div>
+            </section>
+
+            <section class="detail-section" style="margin-bottom:0">
+              <h4>最近运行记录</h4>
+              <div class="section-content run-list"><div class="run"><b>HTML 原型设计平台任务区重构</b><span>今天 18:36 · 生成任务区原型并进入 Skill 化</span></div><div class="run"><b>首页原型设计</b><span>今天 17:22 · 生成首页 Dashboard 原型</span></div></div>
+            </section>
+          </div>
+        </aside>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+  const detailData = {
+    prototype: {
+      title:'如何生成中高保真 HTML 原型',
+      desc:'把需求、截图和参考页面转化为可预览、可迭代的 HTML 原型。',
+      scenario:'当用户提供需求文档、页面截图、参考作品或口头描述，希望生成中高保真 HTML 原型时使用。',
+      inputs:['需求文档或需求描述','当前页面截图','参考页面或风格要求','用户对布局、交互、信息密度的偏好'],
+      steps:['阅读需求，提取页面目标','拆分页面模块和信息层级','确定布局结构和交互入口','生成 HTML 原型','检查视觉质量和概念清晰度','根据反馈迭代并沉淀版本']
+    },
+    requirement: {
+      title:'如何拆解需求文档',
+      desc:'把混乱需求拆成可执行的任务上下文、模块结构和输出清单。',
+      scenario:'当需求文档很长、信息混杂、目标不清晰时使用。',
+      inputs:['需求文档','客户反馈','已有截图或旧页面','业务约束和交付目标'],
+      steps:['识别任务目标','提取背景与约束','拆解页面或功能模块','整理待确认问题','输出任务上下文和执行清单']
+    },
+    report: {
+      title:'如何生成当前任务报告',
+      desc:'把任务过程、上下文、HTML 成果和当前整理转化为固定模板报告。',
+      scenario:'当一个任务完成阶段性成果，需要形成可追溯报告时使用。',
+      inputs:['任务上下文','HTML 成果','当前整理','流程图节点'],
+      steps:['读取任务上下文','套用固定六章模板','生成报告草稿','校验字段完整性','人工修订并保存沉淀']
+    },
+    flow: {
+      title:'如何梳理任务流程图',
+      desc:'将报告第六章中的流程建议转化为可编辑节点和连线。',
+      scenario:'当需要把任务完成方法表达成流程图时使用。',
+      inputs:['任务报告','行动项','流程节点草稿','用户确认点'],
+      steps:['提取流程节点','判断节点顺序','生成连线关系','编辑节点说明','保存并导出流程图']
+    },
+    compete: {
+      title:'如何做竞品能力对比',
+      desc:'统一对比维度、描述标准和输出格式，减少主观发挥。',
+      scenario:'当需要比较两个或多个产品能力，并输出专业对比材料时使用。',
+      inputs:['竞品资料','自身产品资料','对比维度','客户关注点'],
+      steps:['确定对比维度','整理双方能力','统一表达粒度','输出表格和结论','检查是否存在无依据表述']
+    },
+    review: {
+      title:'如何复盘一次任务过程',
+      desc:'从结果、过程、判断、失误和可复用经验中提炼方法。',
+      scenario:'当一个任务结束后，希望把经验变成下次可复用流程时使用。',
+      inputs:['任务报告','执行过程','问题记录','最终结果'],
+      steps:['回顾目标和结果','识别有效步骤','记录判断标准','提炼可复用流程','生成 Skill 草稿']
+    }
+  };
+
+  const cards = document.querySelectorAll('.skill-card');
+  const detailTitle = document.getElementById('detailTitle');
+  const detailDesc = document.getElementById('detailDesc');
+  const scenarioText = document.getElementById('scenarioText');
+  const inputsList = document.getElementById('inputsList');
+  const stepsList = document.getElementById('stepsList');
+
+  cards.forEach(card=>{
+    card.addEventListener('click',()=>{
+      cards.forEach(c=>c.classList.remove('active'));
+      card.classList.add('active');
+      const data = detailData[card.dataset.skill];
+      detailTitle.textContent = data.title;
+      detailDesc.textContent = data.desc;
+      scenarioText.textContent = data.scenario;
+      inputsList.innerHTML = data.inputs.map(i=>`<li>${i}</li>`).join('');
+      stepsList.innerHTML = data.steps.map(i=>`<li>${i}</li>`).join('');
+    })
+  });
+</script>
+</body>
+</html>
