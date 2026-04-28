@@ -4,7 +4,6 @@ import {
   htmlAssets as mockHtmlAssets,
   skills,
   taskContexts as mockTaskContexts,
-  taskReports,
   tasks as mockTasks
 } from '../data/mockData.js';
 
@@ -247,9 +246,36 @@ export function createHtmlAsset(taskId, draft) {
   return asset;
 }
 
-export function getTaskReport(taskId) {
-  return taskReports.find((item) => item.taskId === taskId) ?? null;
+export function updateHtmlAsset(taskId, assetId, updates = {}) {
+  const store = readStore();
+  const current = store.htmlAssets.find((item) => item.taskId === taskId && item.id === assetId);
+  if (!current) return null;
+
+  const nextAsset = {
+    ...current,
+    ...updates,
+    name: updates.name?.trim() || current.name,
+    description: updates.description?.trim() || current.description,
+    updatedAt: nowLabel()
+  };
+
+  store.htmlAssets = store.htmlAssets.map((item) => (item.taskId === taskId && item.id === assetId ? nextAsset : item));
+  touchTask(store, taskId);
+  writeStore(store);
+  return nextAsset;
 }
+
+export function deleteHtmlAsset(taskId, assetId) {
+  const store = readStore();
+  const current = store.htmlAssets.find((item) => item.taskId === taskId && item.id === assetId);
+  if (!current) return null;
+
+  store.htmlAssets = store.htmlAssets.filter((item) => !(item.taskId === taskId && item.id === assetId));
+  touchTask(store, taskId);
+  writeStore(store);
+  return current;
+}
+
 
 export function getHomePageData() {
   const currentTasks = getTasks();
