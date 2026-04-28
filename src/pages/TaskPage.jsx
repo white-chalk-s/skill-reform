@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getHtmlAssetsByTaskId, getTaskById, getTaskContext, getTaskReport, getTasks } from '../services/taskService.js';
+import { createPortal } from 'react-dom';
+import {
+  createHtmlAsset,
+  getHtmlAssetsByTaskId,
+  getTaskById,
+  getTaskContext,
+  getTasks,
+  saveTaskContext,
+  updateTask
+} from '../services/taskService.js';
 
 const DEFAULT_TASK_ID = 'demo-task';
 const EMPTY_TASK_MESSAGE = '未找到当前任务，请返回首页重新选择任务。';
@@ -9,63 +18,6 @@ const TABS = [
   { key: 'flow', label: '流程图' },
   { key: 'skill', label: 'Skill 化' }
 ];
-
-const DEFAULT_PREVIEW_HTML = `
-  <section style="padding:24px;border-radius:18px;background:#f7fbff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;">
-    <h2 style="margin:0 0 10px;color:#1f2c41;font-size:22px;">HTML 预览区</h2>
-    <p style="margin:0;color:#617088;line-height:1.7;">当前还没有可展示的 HTML 成果。你可以先粘贴一段 HTML，再点击“临时预览”。</p>
-  </section>
-`.trim();
-
-function buildReportSections(report) {
-  if (!report) return [];
-
-  return [
-    { label: '任务概述', value: report.overview },
-    { label: '上下文依据', value: report.contextBasis },
-    { label: 'HTML 成果说明', value: report.htmlAssetsSummary },
-    { label: '当前结论', value: report.currentConclusion },
-    { label: '风险边界', value: report.riskBoundary },
-    { label: '后续行动与流程图建议', value: report.nextActionsAndFlowchart }
-  ];
-}
-
-function buildTaskInfoDraft(task, assets, report) {
-  return {
-    title: task?.title ?? '未命名任务',
-    status: task?.status ?? '未知状态',
-    createdAt: task?.createdAt ?? '--',
-    updatedAt: task?.updatedAt ?? '--',
-    htmlAssetCount: String(assets.length),
-    reportVersion: report ? '当前任务报告 V1' : '未生成',
-    notes: ''
-  };
-}
-
-function buildContextDraft(context) {
-  return {
-    goal: context?.goal ?? '',
-    background: context?.background ?? '',
-    constraints: context?.constraints ?? '',
-    criteria: context?.criteria ?? ''
-  };
-}
-
-function buildOrganizeDraft(context, report, assets) {
-  const hasAsset = assets.length > 0;
-
-  return {
-    currentConclusion: report?.currentConclusion ?? '暂未生成当前任务报告，当前整理区先保持为空。',
-    keyBasis: report?.contextBasis ?? context?.constraints ?? '暂无关键依据，请先检查任务上下文。',
-    pendingQuestions: hasAsset
-      ? '当前 HTML 成果是否需要补充更多页面状态？\n当前任务报告是否需要再确认一次重点摘要？'
-      : '当前没有 HTML 成果，是否先补充一个可预览版本？',
-    actionItems: report?.nextActionsAndFlowchart ?? '先补充或选择一个 HTML 成果，再进入报告页继续整理。',
-    flowchartNodes: hasAsset
-      ? '整理任务上下文\n切换 HTML 成果预览\n生成当前任务报告\n人工确认整理结果'
-      : '整理任务上下文\n补充 HTML 成果\n生成当前任务报告'
-  };
-}
 
 function nowLabel() {
   return new Date().toLocaleString('zh-CN', {
@@ -78,11 +30,91 @@ function nowLabel() {
   });
 }
 
-function splitLines(value) {
-  return value
-    .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean);
+function buildTaskInfoDraft(task, assets) {
+  return {
+    title: task?.title ?? '未命名任务',
+    status: task?.status ?? '进行中',
+    createdAt: task?.createdAt ?? '--',
+    updatedAt: task?.updatedAt ?? '--',
+    htmlAssetCount: String(assets.length),
+    reportVersion: '未启用',
+    notes: task?.notes ?? ''
+  };
+}
+
+function buildContextDraft(context) {
+  return {
+    goal: context?.goal ?? '',
+    background: context?.background ?? '',
+    constraints: context?.constraints ?? '',
+    criteria: context?.criteria ?? ''
+  };
+}
+
+function buildOrganizeDraft(task, context, assets) {
+  const assetNames = assets.map((item) => item.name).filter(Boolean);
+
+  return {
+    currentConclusion:
+      assetNames.length > 0
+        ? `当前任务已保存 ${assetNames.length} 个 HTML 成果，可继续围绕「${task?.title ?? '当前任务'}」整理。`
+        : '当前任务还没有已保存的 HTML 成果，建议先完成上下文整理和首个预览版本保存。',
+    keyBasis: [context?.goal, context?.constraints].filter(Boolean).join('\n') || '当前还没有补充任务上下文。',
+    pendingQuestions:
+      assetNames.length > 0
+        ? '是否需要继续补充更多页面状态？\n是否需要统一 HTML 成果命名方式？'
+        : '当前首个 HTML 成果是否已经达到可保存状态？',
+    actionItems:
+      assetNames.length > 0
+        ? '回看任务上下文\n补充 HTML 细节\n保存更多成果版本'
+        : '编辑任务上下文\n粘贴 HTML\n临时预览并保存成果',
+    flowchartNodes:
+      assetNames.length > 0
+        ? '编辑任务上下文\n临时预览 HTML\n保存 HTML 成果\n切换成果预览'
+        : '编辑任务上下文\n粘贴 HTML\n临时预览'
+  };
+}
+
+function buildPreviewSrcDoc(source) {
+  const hasContent = source.trim().length > 0;
+  const body = hasContent
+    ? source
+    : `
+      <div style="min-height:100vh;display:grid;place-items:center;padding:32px;color:#64748b;font:14px/1.7 -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;">
+        暂无 HTML 预览。
+      </div>
+    `;
+
+  return `<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #ffffff;
+      }
+      body {
+        overflow: auto;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      }
+    </style>
+  </head>
+  <body>${body}</body>
+</html>`;
+}
+
+function clampZoom(value) {
+  return Math.min(1.5, Math.max(0.5, value));
+}
+
+function formatZoom(value) {
+  return `${Math.round(value * 100)}%`;
 }
 
 function TaskModal({ title, children, onClose, onSave, saveLabel }) {
@@ -109,41 +141,190 @@ function TaskModal({ title, children, onClose, onSave, saveLabel }) {
   );
 }
 
+function ZoomControls({ zoom, onDecrease, onReset, onIncrease }) {
+  return (
+    <div className="task-zoom-control" role="group" aria-label="预览缩放控制">
+      <button className="soft-btn task-micro-btn" type="button" onClick={onDecrease} aria-label="缩小预览">
+        -
+      </button>
+      <button className="outline-btn task-micro-btn task-zoom-control__value" type="button" onClick={onReset} aria-label="重置缩放">
+        {formatZoom(zoom)}
+      </button>
+      <button className="soft-btn task-micro-btn" type="button" onClick={onIncrease} aria-label="放大预览">
+        +
+      </button>
+    </div>
+  );
+}
+
+function PreviewFrame({ html, title, zoom, fullscreen = false }) {
+  const frameHeight = fullscreen ? 'calc(100dvh - 84px)' : 'calc(100vh - 250px)';
+
+  return (
+    <div className="task-preview-stage">
+      <div className="task-preview-canvas">
+        <iframe
+          className="task-preview-iframe"
+          sandbox="allow-same-origin"
+          srcDoc={buildPreviewSrcDoc(html)}
+          title={title}
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: 'top center',
+            width: '100%',
+            height: frameHeight,
+            minHeight: frameHeight
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FullscreenPreview({ html, title, zoom, onDecreaseZoom, onResetZoom, onIncreaseZoom, onClose }) {
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="task-fullscreen-overlay" role="presentation" onClick={onClose}>
+      <div className="task-fullscreen-panel" role="dialog" aria-modal="true" aria-label="HTML 原型预览" onClick={(event) => event.stopPropagation()}>
+        <div className="task-fullscreen-panel__head">
+          <div className="task-fullscreen-panel__headline">
+            <h2>HTML 原型预览</h2>
+            <span className="task-fullscreen-panel__meta">当前成果：{title}</span>
+          </div>
+          <ZoomControls zoom={zoom} onDecrease={onDecreaseZoom} onReset={onResetZoom} onIncrease={onIncreaseZoom} />
+          <button className="outline-btn task-mini-btn" type="button" onClick={onClose}>
+            退出全屏
+          </button>
+        </div>
+        <div className="task-fullscreen-panel__body">
+          <PreviewFrame html={html} title="HTML 原型预览全屏" zoom={zoom} />
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function AiOrganizeDrawer({ open, draft, onClose, onChange, onRegenerate, onSave }) {
+  if (!open || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="task-drawer-wrap" role="presentation" onClick={onClose}>
+      <aside className="task-drawer" role="dialog" aria-modal="true" aria-label="AI 整理草稿" onClick={(event) => event.stopPropagation()}>
+        <div className="task-drawer__header">
+          <div className="task-drawer__title">
+            <h2>AI 整理草稿</h2>
+            <p>基于任务上下文、HTML 成果和操作过程生成结构化整理；当前阶段支持手动编辑保存。</p>
+          </div>
+          <button className="soft-btn task-mini-btn" type="button" onClick={onClose}>
+            关闭
+          </button>
+        </div>
+        <div className="task-drawer__body">
+          <label className="task-field task-field--full">
+            <span>当前结论</span>
+            <textarea value={draft.currentConclusion} onChange={(event) => onChange('currentConclusion', event.target.value)} />
+          </label>
+          <label className="task-field task-field--full">
+            <span>关键依据</span>
+            <textarea value={draft.keyBasis} onChange={(event) => onChange('keyBasis', event.target.value)} />
+          </label>
+          <label className="task-field task-field--full">
+            <span>待确认问题</span>
+            <textarea value={draft.pendingQuestions} onChange={(event) => onChange('pendingQuestions', event.target.value)} />
+          </label>
+          <label className="task-field task-field--full">
+            <span>行动项</span>
+            <textarea value={draft.actionItems} onChange={(event) => onChange('actionItems', event.target.value)} />
+          </label>
+          <label className="task-field task-field--full">
+            <span>流程图节点</span>
+            <textarea value={draft.flowchartNodes} onChange={(event) => onChange('flowchartNodes', event.target.value)} />
+          </label>
+        </div>
+        <div className="task-drawer__footer">
+          <button className="outline-btn" type="button" onClick={onRegenerate}>
+            重新生成整理
+          </button>
+          <button className="primary-btn" type="button" onClick={onSave}>
+            保存整理
+          </button>
+        </div>
+      </aside>
+    </div>,
+    document.body
+  );
+}
+
 export function TaskPage({ taskId }) {
   const safeTaskId = taskId?.trim() || DEFAULT_TASK_ID;
-  const tasks = useMemo(() => getTasks(), []);
-  const hasCurrentTask = tasks.some((item) => item.id === safeTaskId);
-  const task = hasCurrentTask ? getTaskById(safeTaskId) : null;
-  const context = task ? getTaskContext(task.id) : null;
-  const report = task ? getTaskReport(task.id) : null;
-  const assets = task ? getHtmlAssetsByTaskId(task.id) ?? [] : [];
-  const reportSections = buildReportSections(report);
+  const task = getTaskById(safeTaskId);
+  const hasCurrentTask = useMemo(() => getTasks().some((item) => item.id === safeTaskId) || Boolean(task), [safeTaskId, task]);
+
+  const initialContext = task ? getTaskContext(task.id) : null;
+  const initialAssets = task ? getHtmlAssetsByTaskId(task.id) : [];
 
   const [activeTab, setActiveTab] = useState(TABS[0].key);
-  const [selectedAssetId, setSelectedAssetId] = useState(assets[0]?.id ?? '');
-  const [htmlDraft, setHtmlDraft] = useState(assets[0]?.htmlContent ?? '');
-  const [previewMode, setPreviewMode] = useState(assets[0] ? 'asset' : 'draft');
-  const [taskInfoDraft, setTaskInfoDraft] = useState(() => buildTaskInfoDraft(task, assets, report));
-  const [contextDraft, setContextDraft] = useState(() => buildContextDraft(context));
-  const [organizeDraft, setOrganizeDraft] = useState(() => buildOrganizeDraft(context, report, assets));
+  const [assets, setAssets] = useState(initialAssets);
+  const [selectedAssetId, setSelectedAssetId] = useState(initialAssets[0]?.id ?? '');
+  const [htmlDraft, setHtmlDraft] = useState(initialAssets[0]?.htmlContent ?? '');
+  const [previewMode, setPreviewMode] = useState(initialAssets[0] ? 'asset' : 'draft');
+  const [taskInfoDraft, setTaskInfoDraft] = useState(() => buildTaskInfoDraft(task, initialAssets));
+  const [contextDraft, setContextDraft] = useState(() => buildContextDraft(initialContext));
+  const [organizeDraft, setOrganizeDraft] = useState(() => buildOrganizeDraft(task, initialContext, initialAssets));
+  const [toast, setToast] = useState('');
   const [isTaskInfoOpen, setIsTaskInfoOpen] = useState(false);
   const [isContextOpen, setIsContextOpen] = useState(false);
   const [isOrganizeOpen, setIsOrganizeOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [previewZoom, setPreviewZoom] = useState(1);
 
   useEffect(() => {
+    const nextTask = getTaskById(safeTaskId);
+    const nextContext = nextTask ? getTaskContext(nextTask.id) : null;
+    const nextAssets = nextTask ? getHtmlAssetsByTaskId(nextTask.id) : [];
+
     setActiveTab(TABS[0].key);
-    setSelectedAssetId(assets[0]?.id ?? '');
-    setHtmlDraft(assets[0]?.htmlContent ?? '');
-    setPreviewMode(assets[0] ? 'asset' : 'draft');
-    setTaskInfoDraft(buildTaskInfoDraft(task, assets, report));
-    setContextDraft(buildContextDraft(context));
-    setOrganizeDraft(buildOrganizeDraft(context, report, assets));
+    setAssets(nextAssets);
+    setSelectedAssetId(nextAssets[0]?.id ?? '');
+    setHtmlDraft(nextAssets[0]?.htmlContent ?? '');
+    setPreviewMode(nextAssets[0] ? 'asset' : 'draft');
+    setTaskInfoDraft(buildTaskInfoDraft(nextTask, nextAssets));
+    setContextDraft(buildContextDraft(nextContext));
+    setOrganizeDraft(buildOrganizeDraft(nextTask, nextContext, nextAssets));
+    setToast('');
     setIsTaskInfoOpen(false);
     setIsContextOpen(false);
     setIsOrganizeOpen(false);
     setIsFullscreen(false);
+    setPreviewZoom(1);
   }, [safeTaskId]);
+
+  useEffect(() => {
+    if (!isFullscreen || typeof document === 'undefined') return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeydown = (event) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeydown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeydown);
+    };
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(''), 2000);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
 
   if (!hasCurrentTask || !task) {
     return (
@@ -163,10 +344,14 @@ export function TaskPage({ taskId }) {
 
   const selectedAsset = assets.find((item) => item.id === selectedAssetId) ?? assets[0] ?? null;
   const previewLabel = previewMode === 'draft' ? '临时预览' : selectedAsset?.name ?? 'HTML 预览';
-  const previewHtml =
-    previewMode === 'draft'
-      ? htmlDraft.trim() || DEFAULT_PREVIEW_HTML
-      : selectedAsset?.htmlContent ?? (htmlDraft.trim() || DEFAULT_PREVIEW_HTML);
+  const previewHtml = previewMode === 'draft' ? htmlDraft : selectedAsset?.htmlContent ?? htmlDraft;
+
+  function refreshTaskState(nextTask = task, nextContext = getTaskContext(task.id), nextAssets = getHtmlAssetsByTaskId(task.id)) {
+    setAssets(nextAssets);
+    setTaskInfoDraft(buildTaskInfoDraft(nextTask, nextAssets));
+    setContextDraft(buildContextDraft(nextContext));
+    setOrganizeDraft(buildOrganizeDraft(nextTask, nextContext, nextAssets));
+  }
 
   function handlePreviewDraft() {
     setPreviewMode('draft');
@@ -178,235 +363,265 @@ export function TaskPage({ taskId }) {
   }
 
   function handleSaveCurrent() {
-    setTaskInfoDraft((prev) => ({ ...prev, updatedAt: nowLabel() }));
-  }
+    const savedTask = updateTask(task.id, {
+      title: taskInfoDraft.title,
+      status: taskInfoDraft.status,
+      createdAt: taskInfoDraft.createdAt,
+      notes: taskInfoDraft.notes
+    });
 
-  function handleGenerateReport() {
-    setTaskInfoDraft((prev) => ({
-      ...prev,
-      updatedAt: nowLabel(),
-      reportVersion: prev.reportVersion === '未生成' ? '当前任务报告 V1' : prev.reportVersion
-    }));
-    setActiveTab('report');
+    if (!savedTask) return;
+
+    refreshTaskState(savedTask);
+    setToast('已保存');
   }
 
   function handleSaveTaskInfo() {
-    setTaskInfoDraft((prev) => ({ ...prev, updatedAt: nowLabel() }));
+    handleSaveCurrent();
     setIsTaskInfoOpen(false);
   }
 
   function handleSaveContext() {
+    const savedContext = saveTaskContext(task.id, contextDraft);
+    const savedTask = getTaskById(task.id);
+    const nextAssets = getHtmlAssetsByTaskId(task.id);
+
+    if (savedContext && savedTask) {
+      refreshTaskState(savedTask, savedContext, nextAssets);
+      setToast('已保存');
+    }
+
     setIsContextOpen(false);
   }
 
+  function handleSaveAsset() {
+    const savedAsset = createHtmlAsset(task.id, { htmlContent: htmlDraft });
+    const savedTask = getTaskById(task.id);
+    const nextAssets = getHtmlAssetsByTaskId(task.id);
+    const nextContext = getTaskContext(task.id);
+
+    if (!savedAsset || !savedTask) return;
+
+    refreshTaskState(savedTask, nextContext, nextAssets);
+    setSelectedAssetId(savedAsset.id);
+    setPreviewMode('asset');
+    setToast('HTML 成果已保存');
+  }
+
   function handleSaveOrganize() {
+    setToast('整理已保存');
     setIsOrganizeOpen(false);
+  }
+
+  function handleRegenerateOrganize() {
+    const nextTask = getTaskById(task.id);
+    const nextContext = getTaskContext(task.id);
+    const nextAssets = getHtmlAssetsByTaskId(task.id);
+
+    setOrganizeDraft(buildOrganizeDraft(nextTask, nextContext, nextAssets));
+    setToast('AI 整理能力后续接入');
+  }
+
+  function handleZoomIn() {
+    setPreviewZoom((value) => clampZoom(Number((value + 0.1).toFixed(2))));
+  }
+
+  function handleZoomOut() {
+    setPreviewZoom((value) => clampZoom(Number((value - 0.1).toFixed(2))));
+  }
+
+  function handleZoomReset() {
+    setPreviewZoom(1);
+  }
+
+  function handleOrganizeDraftChange(field, value) {
+    setOrganizeDraft((prev) => ({ ...prev, [field]: value }));
   }
 
   return (
     <>
-      <section className="page-card hero-panel task-head-card">
-        <div className="task-head-card__main">
-          <div className="task-head-card__meta">
-            <a className="link" href="/">
-              返回首页
-            </a>
-            <span className="tag blue">{taskInfoDraft.status}</span>
-          </div>
-          <h1>{taskInfoDraft.title}</h1>
-        </div>
+      <section className="task-page-shell">
+        <section className="task-workbench">
+          <header className="task-workbench-header task-head-card">
+            <div className="task-head-card__left">
+              <div className="task-head-card__meta">
+                <a className="link" href="/">
+                  返回首页
+                </a>
+                <span className="tag blue">{taskInfoDraft.status}</span>
+              </div>
+              <h1>{taskInfoDraft.title}</h1>
+            </div>
 
-        <div className="task-head-tabs" role="tablist" aria-label="任务区视图切换">
-          {TABS.map((tab) => (
-            <button
-              key={tab.key}
-              className={activeTab === tab.key ? 'task-head-tab active' : 'task-head-tab'}
-              type="button"
-              onClick={() => setActiveTab(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+            <div className="task-head-tabs task-head-card__center" role="tablist" aria-label="任务视图切换">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.key}
+                  className={activeTab === tab.key ? 'task-head-tab active' : 'task-head-tab'}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-        <div className="hero-actions task-head-card__actions">
-          <button className="outline-btn task-mini-btn" type="button" onClick={() => setIsTaskInfoOpen(true)}>
-            任务信息
-          </button>
-          <button className="outline-btn task-mini-btn" type="button" onClick={handleSaveCurrent}>
-            保存当前
-          </button>
-          <button className="primary-btn task-mini-btn task-mini-btn--primary" type="button" onClick={handleGenerateReport}>
-            生成任务报告
-          </button>
-          <button className="soft-btn task-mini-btn" type="button">
-            更多
-          </button>
-        </div>
-      </section>
-
-      {activeTab === 'work' && (
-        <section className="task-workspace-shell">
-          <aside className="card task-workspace-shell__side">
-            <div className="card-head task-material-head">
-              <h2>任务素材</h2>
-              <button className="soft-btn task-micro-btn" type="button" onClick={() => setIsContextOpen(true)}>
-                任务上下文
+            <div className="hero-actions task-head-card__actions task-head-card__right">
+              <button className="outline-btn task-mini-btn" type="button" onClick={() => setIsTaskInfoOpen(true)}>
+                任务信息
+              </button>
+              <button className="outline-btn task-mini-btn" type="button" onClick={handleSaveCurrent}>
+                保存当前
+              </button>
+              <button className="primary-btn task-mini-btn task-mini-btn--primary" type="button" onClick={() => setActiveTab('report')}>
+                查看报告
+              </button>
+              <button className="soft-btn task-mini-btn" type="button">
+                更多
               </button>
             </div>
-            <div className="card-body list-stack">
-              <div className="list-item">
-                <b>HTML 粘贴入口</b>
-                <textarea
-                  className="task-lite-textarea"
-                  value={htmlDraft}
-                  placeholder="粘贴 HTML 代码后，可做临时预览。"
-                  onChange={(event) => setHtmlDraft(event.target.value)}
-                />
-                <div className="task-inline-actions">
-                  <button className="soft-btn task-micro-btn" type="button" onClick={handlePreviewDraft}>
-                    临时预览
+          </header>
+
+          {activeTab === 'work' && (
+            <section className="task-workbench-body task-workspace-shell">
+              <aside className="task-workspace-shell__side task-workbench__side">
+                <div className="card-head task-material-head">
+                  <h2>任务素材</h2>
+                  <button className="soft-btn task-micro-btn" type="button" onClick={() => setIsContextOpen(true)}>
+                    任务上下文
                   </button>
                 </div>
-              </div>
-
-              <div className="list-item">
-                <b>HTML 成果列表</b>
-                {assets.length > 0 ? (
-                  <div className="task-asset-lines">
-                    {assets.map((asset) => (
-                      <button
-                        key={asset.id}
-                        className={asset.id === selectedAsset?.id && previewMode === 'asset' ? 'task-asset-line active' : 'task-asset-line'}
-                        type="button"
-                        onClick={() => handleSelectAsset(asset.id)}
-                      >
-                        {asset.name}
+                <div className="card-body list-stack">
+                  <div className="list-item">
+                    <b>HTML 粘贴入口</b>
+                    <textarea
+                      className="task-lite-textarea"
+                      value={htmlDraft}
+                      placeholder="粘贴 HTML 代码后，可以先做临时预览。"
+                      onChange={(event) => setHtmlDraft(event.target.value)}
+                    />
+                    <div className="task-inline-actions">
+                      <button className="soft-btn task-micro-btn" type="button" onClick={handlePreviewDraft}>
+                        临时预览
                       </button>
-                    ))}
+                      <button className="outline-btn task-micro-btn" type="button" onClick={handleSaveAsset}>
+                        保存成果
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  <small>当前没有 HTML 成果。</small>
-                )}
-              </div>
-            </div>
-          </aside>
 
-          <main className="card task-preview-panel">
-            <div className="card-head task-preview-panel__head">
-              <div>
-                <h2>HTML 原型预览</h2>
-                <small>{previewLabel}</small>
-              </div>
-              <div className="task-inline-actions">
-                <button className="outline-btn task-micro-btn" type="button" onClick={() => setIsOrganizeOpen(true)}>
-                  当前整理
-                </button>
-                <button className="soft-btn task-micro-btn" type="button" onClick={() => setIsFullscreen(true)}>
-                  全屏预览
-                </button>
-              </div>
-            </div>
-            <div className="card-body task-preview-panel__body">
-              <div className="preview-frame task-preview-surface" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-            </div>
-          </main>
-        </section>
-      )}
-
-      {activeTab === 'report' && (
-        <section className="card task-detail-panel">
-          <div className="card-head">
-            <h2>当前任务报告</h2>
-          </div>
-          <div className="card-body list-stack">
-            {reportSections.length > 0 ? (
-              reportSections.map((section) => (
-                <div className="list-item" key={section.label}>
-                  <b>{section.label}</b>
-                  <small>{section.value ?? '暂无内容'}</small>
+                  <div className="list-item">
+                    <b>HTML 成果列表</b>
+                    {assets.length > 0 ? (
+                      <div className="task-asset-lines">
+                        {assets.map((asset) => (
+                          <button
+                            key={asset.id}
+                            className={asset.id === selectedAsset?.id && previewMode === 'asset' ? 'task-asset-line active' : 'task-asset-line'}
+                            type="button"
+                            onClick={() => handleSelectAsset(asset.id)}
+                          >
+                            {asset.name}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <small>当前还没有已保存的 HTML 成果。</small>
+                    )}
+                  </div>
                 </div>
-              ))
-            ) : (
-              <div className="preview-frame">当前还没有任务报告，请先返回工作视图整理任务内容。</div>
-            )}
-          </div>
-        </section>
-      )}
+              </aside>
 
-      {activeTab === 'flow' && (
-        <section className="card task-detail-panel">
-          <div className="card-head">
-            <h2>流程图</h2>
-          </div>
-          <div className="card-body">
-            <div className="preview-frame">{report?.nextActionsAndFlowchart ?? '流程图数据暂未生成，后续可继续补充。'}</div>
-          </div>
-        </section>
-      )}
+              <main className="task-preview-panel task-workbench__main">
+                <div className="card-head task-preview-panel__head">
+                  <div className="task-preview-panel__headline">
+                    <h2>预览区</h2>
+                    <span className="task-preview-panel__tag" title={`当前成果：${previewLabel}`}>
+                      当前成果：{previewLabel}
+                    </span>
+                  </div>
+                  <div className="task-inline-actions">
+                    <ZoomControls zoom={previewZoom} onDecrease={handleZoomOut} onReset={handleZoomReset} onIncrease={handleZoomIn} />
+                    <button className="outline-btn task-micro-btn" type="button" onClick={() => setIsOrganizeOpen(true)}>
+                      AI 整理草稿
+                    </button>
+                    <button className="soft-btn task-micro-btn" type="button" onClick={() => setIsFullscreen(true)}>
+                      全屏预览
+                    </button>
+                  </div>
+                </div>
+                <div className="card-body task-preview-panel__body">
+                  <PreviewFrame html={previewHtml} title={previewLabel} zoom={previewZoom} />
+                </div>
+              </main>
+            </section>
+          )}
 
-      {activeTab === 'skill' && (
-        <section className="card task-detail-panel">
-          <div className="card-head">
-            <h2>Skill 化</h2>
-          </div>
-          <div className="card-body">
-            <div className="preview-frame">{report?.currentConclusion ?? 'Skill 化内容暂未生成，后续可基于当前任务报告继续沉淀。'}</div>
-          </div>
+          {activeTab === 'report' && (
+            <section className="task-workbench-panel task-detail-panel">
+              <div className="card-head">
+                <h2>当前任务报告</h2>
+              </div>
+              <div className="card-body">
+                <div className="preview-frame">当前阶段先暂停复杂报告能力。MVP 只保留任务创建、上下文编辑、HTML 预览和 HTML 成果保存主链路。</div>
+              </div>
+            </section>
+          )}
+
+          {activeTab === 'flow' && (
+            <section className="task-workbench-panel task-detail-panel">
+              <div className="card-head">
+                <h2>流程图</h2>
+              </div>
+              <div className="card-body">
+                <div className="preview-frame">当前阶段暂停流程图能力，后续在 MVP 主链路稳定后再恢复。</div>
+              </div>
+            </section>
+          )}
+
+          {activeTab === 'skill' && (
+            <section className="task-workbench-panel task-detail-panel">
+              <div className="card-head">
+                <h2>Skill 化</h2>
+              </div>
+              <div className="card-body">
+                <div className="preview-frame">当前阶段暂停 Skill 化能力，后续再继续推进。</div>
+              </div>
+            </section>
+          )}
         </section>
-      )}
+      </section>
 
       {isTaskInfoOpen && (
         <TaskModal title="任务信息" onClose={() => setIsTaskInfoOpen(false)} onSave={handleSaveTaskInfo} saveLabel="保存信息">
           <div className="task-form-grid">
             <label className="task-field">
               <span>任务标题</span>
-              <input
-                value={taskInfoDraft.title}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, title: event.target.value }))}
-              />
+              <input value={taskInfoDraft.title} onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, title: event.target.value }))} />
             </label>
             <label className="task-field">
               <span>任务状态</span>
-              <input
-                value={taskInfoDraft.status}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, status: event.target.value }))}
-              />
+              <input value={taskInfoDraft.status} onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, status: event.target.value }))} />
             </label>
             <label className="task-field">
               <span>创建时间</span>
-              <input
-                value={taskInfoDraft.createdAt}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, createdAt: event.target.value }))}
-              />
+              <input value={taskInfoDraft.createdAt} onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, createdAt: event.target.value }))} />
             </label>
             <label className="task-field">
               <span>更新时间</span>
-              <input
-                value={taskInfoDraft.updatedAt}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, updatedAt: event.target.value }))}
-              />
+              <input value={taskInfoDraft.updatedAt} readOnly />
             </label>
             <label className="task-field">
               <span>HTML 成果数</span>
-              <input
-                value={taskInfoDraft.htmlAssetCount}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, htmlAssetCount: event.target.value }))}
-              />
+              <input value={taskInfoDraft.htmlAssetCount} readOnly />
             </label>
             <label className="task-field">
               <span>报告版本</span>
-              <input
-                value={taskInfoDraft.reportVersion}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, reportVersion: event.target.value }))}
-              />
+              <input value={taskInfoDraft.reportVersion} readOnly />
             </label>
             <label className="task-field task-field--full">
               <span>任务备注</span>
-              <textarea
-                value={taskInfoDraft.notes}
-                onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, notes: event.target.value }))}
-              />
+              <textarea value={taskInfoDraft.notes} onChange={(event) => setTaskInfoDraft((prev) => ({ ...prev, notes: event.target.value }))} />
             </label>
           </div>
         </TaskModal>
@@ -417,116 +632,44 @@ export function TaskPage({ taskId }) {
           <div className="task-form-grid">
             <label className="task-field task-field--full">
               <span>任务目标</span>
-              <textarea
-                value={contextDraft.goal}
-                onChange={(event) => setContextDraft((prev) => ({ ...prev, goal: event.target.value }))}
-              />
+              <textarea value={contextDraft.goal} onChange={(event) => setContextDraft((prev) => ({ ...prev, goal: event.target.value }))} />
             </label>
             <label className="task-field task-field--full">
               <span>背景资料</span>
-              <textarea
-                value={contextDraft.background}
-                onChange={(event) => setContextDraft((prev) => ({ ...prev, background: event.target.value }))}
-              />
+              <textarea value={contextDraft.background} onChange={(event) => setContextDraft((prev) => ({ ...prev, background: event.target.value }))} />
             </label>
             <label className="task-field task-field--full">
               <span>约束条件</span>
-              <textarea
-                value={contextDraft.constraints}
-                onChange={(event) => setContextDraft((prev) => ({ ...prev, constraints: event.target.value }))}
-              />
+              <textarea value={contextDraft.constraints} onChange={(event) => setContextDraft((prev) => ({ ...prev, constraints: event.target.value }))} />
             </label>
             <label className="task-field task-field--full">
               <span>判断标准</span>
-              <textarea
-                value={contextDraft.criteria}
-                onChange={(event) => setContextDraft((prev) => ({ ...prev, criteria: event.target.value }))}
-              />
+              <textarea value={contextDraft.criteria} onChange={(event) => setContextDraft((prev) => ({ ...prev, criteria: event.target.value }))} />
             </label>
           </div>
         </TaskModal>
       )}
 
-      {isOrganizeOpen && (
-        <div className="task-drawer-wrap" role="presentation" onClick={() => setIsOrganizeOpen(false)}>
-          <aside className="task-drawer" role="dialog" aria-modal="true" aria-label="当前整理" onClick={(event) => event.stopPropagation()}>
-            <div className="task-drawer__head">
-              <h2>当前整理</h2>
-              <button className="soft-btn task-mini-btn" type="button" onClick={() => setIsOrganizeOpen(false)}>
-                关闭
-              </button>
-            </div>
-            <div className="task-drawer__body">
-              <label className="task-field task-field--full">
-                <span>当前结论</span>
-                <textarea
-                  value={organizeDraft.currentConclusion}
-                  onChange={(event) => setOrganizeDraft((prev) => ({ ...prev, currentConclusion: event.target.value }))}
-                />
-              </label>
-              <label className="task-field task-field--full">
-                <span>关键依据</span>
-                <textarea
-                  value={organizeDraft.keyBasis}
-                  onChange={(event) => setOrganizeDraft((prev) => ({ ...prev, keyBasis: event.target.value }))}
-                />
-              </label>
-              <label className="task-field task-field--full">
-                <span>待确认问题</span>
-                <textarea
-                  value={organizeDraft.pendingQuestions}
-                  onChange={(event) => setOrganizeDraft((prev) => ({ ...prev, pendingQuestions: event.target.value }))}
-                />
-              </label>
-              <label className="task-field task-field--full">
-                <span>行动项</span>
-                <textarea
-                  value={organizeDraft.actionItems}
-                  onChange={(event) => setOrganizeDraft((prev) => ({ ...prev, actionItems: event.target.value }))}
-                />
-              </label>
-              <label className="task-field task-field--full">
-                <span>流程图节点</span>
-                <textarea
-                  value={organizeDraft.flowchartNodes}
-                  onChange={(event) => setOrganizeDraft((prev) => ({ ...prev, flowchartNodes: event.target.value }))}
-                />
-              </label>
+      <AiOrganizeDrawer
+        open={isOrganizeOpen}
+        draft={organizeDraft}
+        onClose={() => setIsOrganizeOpen(false)}
+        onChange={handleOrganizeDraftChange}
+        onRegenerate={handleRegenerateOrganize}
+        onSave={handleSaveOrganize}
+      />
 
-              <div className="task-drawer__chips">
-                {splitLines(organizeDraft.flowchartNodes).map((item) => (
-                  <span className="tag blue" key={item}>
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="task-drawer__actions">
-              <button className="outline-btn" type="button" onClick={() => setIsOrganizeOpen(false)}>
-                取消
-              </button>
-              <button className="primary-btn" type="button" onClick={handleSaveOrganize}>
-                保存整理
-              </button>
-            </div>
-          </aside>
-        </div>
-      )}
-
+      {toast ? <div className="task-toast" role="status" aria-live="polite">{toast}</div> : null}
       {isFullscreen && (
-        <div className="task-overlay task-overlay--dark" role="presentation" onClick={() => setIsFullscreen(false)}>
-          <div className="task-fullscreen" role="dialog" aria-modal="true" aria-label="HTML 原型预览" onClick={(event) => event.stopPropagation()}>
-            <div className="task-fullscreen__head">
-              <h2>HTML 原型预览</h2>
-              <button className="outline-btn task-mini-btn" type="button" onClick={() => setIsFullscreen(false)}>
-                退出全屏
-              </button>
-            </div>
-            <div className="task-fullscreen__body">
-              <div className="preview-frame task-preview-surface task-preview-surface--fullscreen" dangerouslySetInnerHTML={{ __html: previewHtml }} />
-            </div>
-          </div>
-        </div>
+        <FullscreenPreview
+          html={previewHtml}
+          title={previewLabel}
+          zoom={previewZoom}
+          onDecreaseZoom={handleZoomOut}
+          onResetZoom={handleZoomReset}
+          onIncreaseZoom={handleZoomIn}
+          onClose={() => setIsFullscreen(false)}
+        />
       )}
     </>
   );

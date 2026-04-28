@@ -7,6 +7,9 @@ import { SettingsPage } from './pages/SettingsPage.jsx';
 
 function getRoute(pathname) {
   if (pathname === '/') return { key: 'home', params: {} };
+  if (pathname === '/tasks' || pathname === '/tasks/') {
+    return { key: 'tasks', params: { id: 'demo-task' } };
+  }
   if (/^\/tasks\/[^/]+$/.test(pathname)) {
     return { key: 'tasks', params: { id: pathname.split('/')[2] } };
   }

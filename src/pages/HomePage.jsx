@@ -7,7 +7,7 @@ import {
   Sparkles,
   Workflow
 } from 'lucide-react';
-import { getHomePageData } from '../services/taskService.js';
+import { createTask, getHomePageData } from '../services/taskService.js';
 
 const statIcons = {
   blue: FolderKanban,
@@ -23,10 +23,10 @@ const quickIcons = {
 };
 
 const skillGlyphs = {
-  purple: '✦',
-  blue: '▣',
-  orange: '◫',
-  green: '⌁'
+  purple: 'A',
+  blue: 'B',
+  orange: 'C',
+  green: 'D'
 };
 
 const thumbLabel = {
@@ -38,15 +38,24 @@ const thumbLabel = {
 export function HomePage() {
   const homeDashboard = getHomePageData();
 
+  function handleCreateTask() {
+    const task = createTask();
+    window.location.href = `/tasks/${task.id}`;
+  }
+
   return (
     <div className="home-page">
       <section className="page-card home-hero">
         <div className="home-hero-text">
-          <h1>欢迎使用任务方法沉淀与 AI Skill 生成平台</h1>
-          <p>把任务过程沉淀成可复用流程，再转化为 AI 可执行的 Skill。</p>
+          <h1>欢迎使用任务方法沉淀平台 / AI Skill 生成平台</h1>
+          <p>先把任务主流程跑通，再把过程沉淀成可复用的方法与后续能力。</p>
           <div className="home-hero-actions">
-            <a className="primary-btn home-hero-btn" href="/tasks/demo-task">＋ 新建任务</a>
-            <a className="outline-btn home-hero-btn" href="/skills">✦ 从 Skill 创建</a>
+            <button className="primary-btn home-hero-btn" type="button" onClick={handleCreateTask}>
+              + 新建任务
+            </button>
+            <a className="outline-btn home-hero-btn" href="/skills">
+              查看 Skill 库
+            </a>
           </div>
         </div>
 
@@ -73,7 +82,9 @@ export function HomePage() {
         <section className="card home-calendar">
           <div className="card-head">
             <h3>任务日历</h3>
-            <a className="link" href="/tasks/demo-task">查看全部</a>
+            <a className="link" href="/tasks/demo-task">
+              查看全部
+            </a>
           </div>
           <div className="card-body">
             <div className="home-calendar-top">
@@ -91,7 +102,9 @@ export function HomePage() {
 
             <div className="home-calendar-grid">
               {homeDashboard.calendar.weekNames.map((name) => (
-                <div className="home-day-name" key={name}>{name}</div>
+                <div className="home-day-name" key={name}>
+                  {name}
+                </div>
               ))}
 
               {homeDashboard.calendar.days.map((day, index) => (
@@ -123,11 +136,13 @@ export function HomePage() {
         <section className="card home-today">
           <div className="card-head">
             <h3>今日待处理</h3>
-            <a className="link" href="/tasks/demo-task">查看全部（8）</a>
+            <a className="link" href="/tasks/demo-task">
+              查看全部
+            </a>
           </div>
           <div className="card-body home-task-list">
             {homeDashboard.todayTasks.map((task) => (
-              <div className="home-task" key={task.id}>
+              <a className="home-task" href={`/tasks/${task.id}`} key={task.id}>
                 <span className="home-checkbox" />
                 <div>
                   <b>{task.title}</b>
@@ -135,7 +150,7 @@ export function HomePage() {
                 </div>
                 <span className={`status ${task.status === '进行中' ? 'orange' : task.status === '待处理' ? 'blue' : 'gray'}`}>{task.status}</span>
                 <span className="home-time">{task.scheduledTime}</span>
-              </div>
+              </a>
             ))}
           </div>
         </section>
@@ -163,11 +178,13 @@ export function HomePage() {
         <section className="card home-history">
           <div className="card-head">
             <h3>历史任务</h3>
-            <a className="link" href="/tasks/demo-task">查看全部</a>
+            <a className="link" href="/tasks/demo-task">
+              查看全部
+            </a>
           </div>
           <div className="card-body home-history-list">
             {homeDashboard.historyTasks.map((item) => (
-              <div className="home-history-item" key={item.id}>
+              <a className="home-history-item" href={`/tasks/${item.id}`} key={item.id}>
                 <div>
                   <b>{item.title}</b>
                   <small>{item.summary}</small>
@@ -175,7 +192,7 @@ export function HomePage() {
                 <span className={`status ${item.status === '已完成' ? 'green' : 'orange'}`}>{item.status}</span>
                 <small>更新于 {item.updatedAt}</small>
                 <span className="home-arrow">›</span>
-              </div>
+              </a>
             ))}
           </div>
         </section>
@@ -183,7 +200,9 @@ export function HomePage() {
         <section className="card home-recent">
           <div className="card-head">
             <h3>最近沉淀</h3>
-            <a className="link" href="/skills">查看全部</a>
+            <a className="link" href="/skills">
+              查看全部
+            </a>
           </div>
           <div className="card-body home-recent-grid">
             {homeDashboard.recentAssets.map((item) => (
@@ -203,7 +222,9 @@ export function HomePage() {
         <section className="card home-skills">
           <div className="card-head">
             <h3>最近使用 Skill</h3>
-            <a className="link" href="/skills">查看全部</a>
+            <a className="link" href="/skills">
+              查看全部
+            </a>
           </div>
           <div className="card-body home-skill-list">
             {homeDashboard.recentSkills.map((item) => (
@@ -220,9 +241,7 @@ export function HomePage() {
         </section>
       </section>
 
-      <footer className="home-footer">
-        © 2025 任务方法沉淀平台 · 让任务方法更有价值
-      </footer>
+      <footer className="home-footer">© 2025 任务方法沉淀平台</footer>
     </div>
   );
 }
